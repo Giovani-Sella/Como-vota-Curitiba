@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // =============================
   // PATHS DE DADOS
   // =============================
-  const svgPath = '/Bases/bairros_curitiba.svg';
-  const caminhoDadosEleitorais = '/Bases/Dados_eleitorais_vereadores_por_bairro_CWB.csv';
-  const caminhoDadosHab = '/bases/infocuritiba/DB_HAB_INFOCURITIBA.csv';
-  const caminhoDadosRenda = '/bases/infocuritiba/DB_RENDA_INFOCURITIBA.csv';
+  const svgPath = '/Pasta/bairros_curitiba.svg';
+  const caminhoDadosEleitorais = '/Pasta/Dados_eleitorais_vereadores_por_bairro_CWB.csv';
+  const caminhoDadosHab = '/Pasta/infocuritiba/DB_HAB_INFOCURITIBA.csv';
+  const caminhoDadosRenda = '/Pasta/infocuritiba/DB_RENDA_INFOCURITIBA.csv';
 
   // =============================
   // VARIÁVEIS GLOBAIS
@@ -341,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+
 
 
 
