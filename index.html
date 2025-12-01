@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Como Vota Curitiba</title>
+
+  <!-- Fonte -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap" rel="stylesheet">
+
+  <!-- Estilo principal -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="Snap">
+    <!-- SEÇÃO INICIAL -->
+    <div class="inicial">
+      <h1 class="titulo_texto">COMO VOTA CURITIBA</h1>
+      <p class="titulo_texto">
+        Reportagem e site por
+        <a href="https://giovanisella.com.br" target="_blank">Giovani Sella</a> e
+        <a href="https://www.linkedin.com/in/rodrigomatana/" target="_blank">Rodrigo Matana</a>
+      </p>
+    </div>
+
+    <!-- SEÇÃO PRINCIPAL -->
+    <div class="principal">
+
+      <!-- MAPA INTERATIVO -->
+
+      <div class="mapa">
+        <div id="followArea">
+          <div id="Svg_Container"></div>
+          <div id="textoMouse"></div>
+        </div>
+        <div class="visualozacaomapa" id="visualozacaomapa">Numero_total_votos</div>
+      </div>
+
+
+      <!-- PAINEL LATERAL -->
+      <div class="lateralDireita">
+        <div class="Escolha_bairros">
+          <h2>Selecione um Bairro</h2>
+          <div id="listaContainer"></div>
+        </div>
+
+        <div class="informacoes">
+          <h2 id="Nome_Bairro" class="nomeDoBairro">Nenhum bairro selecionado</h2>
+
+          <!-- COLUNA 1: Dados Eleitorais -->
+          <div class="divinformacoes">
+            <h3>Total de votos</h3>
+            <h2 id="Numero_total_votos">—</h2>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Em pessoas negras</h3>
+            <div class="subdivinformacoes">
+              <h2 id="Numero_votos_pessoas_negras">—</h2>
+              <h2 id="Porcentagem_votos_pessoas_negras">—</h2>
+            </div>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Em mulheres</h3>
+            <div class="subdivinformacoes">
+              <h2 id="Numero_votos_mulheres">—</h2>
+              <h2 id="Porcentagem_votos_mulheres">—</h2>
+            </div>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Votos nulos</h3>
+            <h2 id="Numero_votos_nulos">—</h2>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Votos brancos</h3>
+            <h2 id="Numero_votos_brancos">—</h2>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Partido mais votado</h3>
+            <h2 id="PartidoMaisVotado">—</h2>
+          </div>
+
+          <div class="divinformacoes destaque">
+            <h3>Vereador mais votado</h3>
+            <h2 id="VereadorMaisVotado">—</h2>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Total de moradores</h3>
+            <h2 id="Numero_total_moradores">—</h2>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Renda per capita</h3>
+            <h2 id="RendaPercapta">—</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTAGEM -->
+    <div class="paginaSobre">
+      <div class="margemTexto">
+        <h1>Afinal, como vota Curitiba?</h1>
+
+        <p>Essa pergunta surgiu enquanto
+          <a href="https://giovanisella.com.br" target="_blank">Giovani Sella</a> e
+          <a href="https://www.linkedin.com/in/rodrigomatana/" target="_blank">Rodrigo Matana</a>
+          produziram a reportagem <a href="/pages/rep1.html" target="_blank">Bancada negra ainda é minoria na Câmara
+            Municipal de Curitiba</a>.<br> <br>
+
+          Para responder essa questão, foram a fundo nos <b>dados eleitorais do TSE</b>. Depararam-se com um banco de
+          dados
+          vasto, que não havia sido explorado por veículos jornalísticos. Os dados são públicos, divulgados todos os
+          anos pelo TSE, porém não são de fácil interpretação. Por se tratar de uma base extensa, é necessário certo
+          conhecimento em análise de dados e programação.<br><br>
+
+          <b>Como vota Curitiba</b> surge como uma maneira de democratizar a interpretação desses dados. É uma
+          plataforma para que jornalistas, cientistas políticos e estudiosos encontrem padrões e compreendam os
+          fenômenos das eleições curitibanas. <br> <br>
+
+
+
+        </p>
+
+      </div>
+    </div>
+
+    <div class="paginaBaseados">
+      <div class="margemTexto">
+        <h1>Reportagens baseadas em nós</h1>
+
+        <div class="reportagens">
+          <div class="reportagem" id="Votos_Negros">
+            <h2><a href="pages/rep1.html">Bancada negra ainda é minoria na Câmara Municipal de Curitiba</a></h2>
+            <h3>Na capital mais negra do Sul do Brasil, apenas um a cada dez vereadores eleitos é negro ou negra</h3>
+
+          </div>
+          <div class="reportagem" id="Votos_Negros">
+            <h2><a href="pages/rep1.html">Bancada negra ainda é minoria na Câmara Municipal de Curitiba</a></h2>
+            <h3>Na capital mais negra do Sul do Brasil, apenas um a cada dez vereadores eleitos é negro ou negra</h3>
+
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+    <div class="rodape">
+      <h1 class="textoRodape">COMO VOTA CURITIBA</h1>
+      <p class="textoRodape2">Reportagem e site por
+        <a href="https://giovanisella.com.br" target="_blank">Giovani Sella</a> e
+        <a href="https://www.linkedin.com/in/rodrigomatana/" target="_blank">Rodrigo Matana</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+
+</body>
+
+</html>
