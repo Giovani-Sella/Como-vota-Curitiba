@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Como Vota Curitiba</title>
+
+  <!-- Fonte -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap" rel="stylesheet">
+
+  <!-- Estilo principal -->
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+  <div class="Snapoff">
+    <div class="reportagem" id="Retornar">
+      <a href="pages/rep1.html">Retornar</a>
+    </div>
+
+    <div class="margemTexto">
+      <h1>Bairros que sofrem com emergência climática não votam em pautas climáticas</h1>
+
+      <h2>Na capital mais negra do Sul do Brasil, apenas um a cada dez vereadores eleitos é negro ou negra<br>
+      </h2>
+
+      <p><br>Nas últimas três legislaturas – 2016, 2020 e 2024 –, a Câmara Municipal de Curitiba (CMC) elegeu
+        114
+        vereadores. Desses, apenas 11 são pessoas negras. Proporcionalmente, apenas uma a cada dez pessoas
+        eleitas para o cargo na capital é negra. Desde 2016, quando candidatos passaram a declarar cor/raça
+        ao Tribunal Superior Eleitoral (TSE), quase 90% das cadeiras foram ocupadas por pessoas brancas.
+        Mais de 75% pertenceram a homens. Até a próxima eleição municipal, em 2028, serão 12 anos de
+        legislatura curitibana com apenas seis mandatos de pessoas pretas. <br><br>
+
+        O Estatuto da Igualdade Racial, instituído pela lei n° 12.288, de 2010, considera pessoas negras as
+        que se autodeclaram pretas ou pardas. Essa é a classificação usada pelo Instituto Brasileiro de
+        Geografia e Estatística (IBGE) no Censo Demográfico, que, em 2022, apontou que 55,5% da população
+        brasileira é negra. Ainda de acordo com o Censo, Curitiba é a capital mais negra do Sul brasileiro.
+        Vivem nela quase 430 mil negros e negras, que representam 24% dos habitantes do município. <br><br>
+
+        De 752 candidaturas a vereador em 2024, 198 eram de pessoas pretas ou pardas, 26% do total. Nas
+        urnas, a proporção é diferente: apenas 15% dos votos válidos do eleitorado curitibano foram em
+        candidatas ou candidatos negros.<br><br></p>
+
+      </p>
+    </div>
+
+    <!-- SEÇÃO PRINCIPAL -->
+    <div class="principal">
+
+      <!-- MAPA INTERATIVO -->
+
+      <div class="mapa">
+        <div id="followArea">
+          <div id="Svg_Container"></div>
+          <div id="textoMouse"></div>
+        </div>
+        <div class="visualozacaomapa" id="visualozacaomapa">visualização Base</div>
+      </div>
+
+
+      <!-- PAINEL LATERAL -->
+      <div class="lateralDireita">
+        <div class="Escolha_bairros">
+          <h2>Selecione um Bairro</h2>
+          <div id="listaContainer"></div>
+        </div>
+
+        <div class="informacoes">
+          <h2 id="Nome_Bairro" class="nomeDoBairro">Nenhum bairro selecionado</h2>
+
+          <!-- COLUNA 1: Dados Eleitorais -->
+          <div class="divinformacoes">
+            <h3>Total de votos</h3>
+            <h2 id="Numero_total_votos">—</h2>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Em pessoas negras</h3>
+            <div class="subdivinformacoes">
+              <h2 id="Numero_votos_pessoas_negras">—</h2>
+              <h2 id="Porcentagem_votos_pessoas_negras">—</h2>
+            </div>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Em mulheres</h3>
+            <div class="subdivinformacoes">
+              <h2 id="Numero_votos_mulheres">—</h2>
+              <h2 id="Porcentagem_votos_mulheres">—</h2>
+            </div>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Votos nulos</h3>
+            <h2 id="Numero_votos_nulos">—</h2>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Votos brancos</h3>
+            <h2 id="Numero_votos_brancos">—</h2>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Partido mais votado</h3>
+            <h2 id="PartidoMaisVotado">—</h2>
+          </div>
+
+          <div class="divinformacoes destaque">
+            <h3>Vereador mais votado</h3>
+            <h2 id="VereadorMaisVotado">—</h2>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Total de moradores</h3>
+            <h2 id="Numero_total_moradores">—</h2>
+          </div>
+
+          <div class="divinformacoes">
+            <h3>Renda per capita</h3>
+            <h2 id="RendaPercapta">—</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="margemTexto">
+      <p>Ao cruzar os dados eleitorais do TSE, é possível compreender melhor como a população curitibana
+        vota.
+        Na divisão por bairros, algumas regiões se destacam pela votação em pessoas negras, como os bairros
+        Parolin e São Miguel. Por outro lado, os bairros Mossunguê, Butiatuvinha e Santo Inácio, regiões
+        nobres da cidade, não atingem 9% de votos em candidaturas negras.<br><br>
+
+        Os bairros Mossunguê (Ecoville), Butiatuvinha e Santo Inácio, considerados nobres, não atingem 9% de
+        votos em pessoas negras.<br><br>
+
+        O maior índice de votação em candidatas ou candidatos negros é do Parolin, com 44%. Em seguida, está
+        São Miguel, com 30,1%. Nos bairros São Braz e Cajuru, 28,2% e 25,9% dos votos, respectivamente,
+        foram em pessoas pretas ou pardas. A partir o mapa, é possível perceber que bairros periféricos da
+        região sul, sudoeste e centro-oeste de Curitiba votaram mais em pessoas negras. Bairros considerados
+        nobres, na região norte, com exceção do centro, votaram menos em vereadores pretos e pardos.<br><br>
+
+        Separamos a tabela completa com os dados de cada um dos bairros da cidade de Curitiba. Ela está
+        disponível<a href="https://drive.google.com/drive/folders/1foM6PWDEQbQfqcZyLzImyisW_QqAMf1B">
+          aqui</a>, juntamente com os scripts de análise dos dados e demais arquivos.<br><br>
+      </p>
+
+      <h2>As representantes pretas na Câmara</h2>
+
+      <p>Na CMC, a representação da bancada negra está menor que em 2020: 5% da próxima gestão. As duas únicas
+        pessoas pretas eleitas para a 19ª Legislatura da Câmara Municipal, ambas mulheres, são Giorgia
+        Prates Mandata Preta (PT) e Vanda de Assis (PT).<br><br>
+
+        Prates foi eleita para o segundo mandato, com 6.070 votos – número 70% maior do que no pleito de
+        2020, quando ocupou a terceira suplência do Partido dos Trabalhadores na casa. “É um cenário muito
+        ruim porque a gente sabe a dificuldade prática que a falta de representatividade traz”,
+        afirma.<br><br>
+
+        Para Giorgia Prates, o baixo índice de pessoas negras eleitas no município, para além da baixa
+        representatividade, é obstáculo à própria democracia. “Acaba rolando uma inversão: a política, que
+        existe para atender os mais vulneráveis, fica a serviço dos mais abastados”, diz.<br><br>
+
+        <strong>“A política, que existe para atender os mais vulneráveis, fica a serviço dos mais
+          abastados”.</strong>
+        Giorgia Prates (PT), vereadora reeleita<br><br>
+      </p>
+
+      <h2>Perfil da periferia</h2>
+
+      <p> Eleita pelo PT, Vanda de Assis foi eleita neste ano para o primeiro mandato como vereadora na
+        Câmara Municipal de Curitiba, com 5.006 votos. Assistente social e integrante do Conselho Permanente
+        de Direitos Humanos (COPEDH/PR), ela dá destaque à presença da população negra na capital
+        paranaense. “A cidade da propaganda pode se mostrar branca, mas a periferia é composta por mulheres
+        e homens negros e negras”, expressa.<br><br>
+
+        As regiões periféricas e menos valorizadas pelo governo municipal, como apontam os dados do TSE,
+        representam os maiores índices de votação em pessoas negras para o poder legislativo de Curitiba.
+        “Lá na periferia, é muito difícil encontrar um grupo que não seja formado em maioria por mulheres
+        negras”, afirma a vereadora.<br><br>
+
+        <strong>“A cidade da propaganda pode se mostrar branca, mas a periferia é composta por mulheres e
+          homensnegros e negras”.</strong>
+        Vanda de Assis (PT), vereadora eleita<br><br>
+
+      </p>
+    </div>
+
+    <div class="paginaBaseados">
+      <div class="margemTexto">
+        <h1>Reportagens baseadas em nós</h1>
+
+        <div class="reportagens">
+          <div class="reportagem" id="Votos_Negros">
+            <h2><a href="pages/rep1.html">Bancada negra ainda é minoria na Câmara Municipal de Curitiba</a></h2>
+            <h3>Na capital mais negra do Sul do Brasil, apenas um a cada dez vereadores eleitos é negro ou negra</h3>
+
+          </div>
+          <div class="reportagem" id="Votos_Negros">
+            <h2><a href="pages/rep1.html">Bancada negra ainda é minoria na Câmara Municipal de Curitiba</a></h2>
+            <h3>Na capital mais negra do Sul do Brasil, apenas um a cada dez vereadores eleitos é negro ou negra</h3>
+
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+    <div class="rodape">
+      <h1 class="textoRodape">COMO VOTA CURITIBA</h1>
+      <p class="textoRodape2">Reportagem e site por
+        <a href="https://giovanisella.com.br" target="_blank">Giovani Sella</a> e
+        <a href="https://www.linkedin.com/in/rodrigomatana/" target="_blank">Rodrigo Matana</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/src/script.js"></script>
+
+</body>
+
+</html>
