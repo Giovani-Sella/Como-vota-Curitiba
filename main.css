@@ -2,9 +2,11 @@
    ESTILOS MOBILE (Max-width: 768px)
    ==================================== */
 @media (max-width: 768px) {
+
     /* --- VARIÁVEIS GERAIS (Ajuste de Espaçamento) --- */
     :root {
-        --espacamento: 15px; /* Reduz o espaçamento geral */
+        --espacamento: 15px;
+        /* Reduz o espaçamento geral */
     }
 
     /* --- BASE --- */
@@ -34,18 +36,23 @@
     .paginaReportagem,
     .paginaBaseados {
         scroll-snap-align: start;
-        height: auto; /* Permite que o conteúdo defina a altura */
-        min-height: 100vh; /* Garante que ainda ocupe a altura da tela no mínimo */
+        height: auto;
+        /* Permite que o conteúdo defina a altura */
+        min-height: 100vh;
+        /* Garante que ainda ocupe a altura da tela no mínimo */
         padding-top: var(--espacamento);
         padding-bottom: var(--espacamento);
     }
 
     /* O elemento principal precisa empilhar seus filhos */
     .principal {
-        flex-direction: column; /* Empilha mapa e lateral */
-        padding-left: var(--espacamento); /* Usa o novo espaçamento */
+        flex-direction: column;
+        /* Empilha mapa e lateral */
+        padding-left: var(--espacamento);
+        /* Usa o novo espaçamento */
         padding-right: var(--espacamento);
-        height: auto; /* Permite que se expanda para acomodar os filhos empilhados */
+        height: auto;
+        /* Permite que se expanda para acomodar os filhos empilhados */
     }
 
     /* Ajusta margens de texto para ocupar mais espaço na tela */
@@ -56,23 +63,32 @@
 
     /* Oculta ou simplifica elementos de rodapé se necessário (ajuste o texto para caber) */
     .rodape {
-        height: 250px; /* Rodapé menor */
+        height: 250px;
+        /* Rodapé menor */
         justify-content: center;
         padding: var(--espacamento) 0;
     }
 
     .textoRodape {
-        font-size: 30pt; /* Fonte do rodapé menor */
+        font-size: 30pt;
+        /* Fonte do rodapé menor */
         text-align: center;
     }
 
     /* --- MAPA E SVG --- */
     .mapa {
         width: 100%;
-        flex: none; /* Remove o flex-grow */
-        height: 50vh; /* Dá uma altura fixa ou relativa para o mapa em mobile */
+        flex: none;
+        /* Remove o flex-grow */
+        height: 40vh;
+        /* Dá uma altura fixa ou relativa para o mapa em mobile */
         min-height: 300px;
-        order: 1; /* Garante que o mapa venha antes do painel lateral se desejar */
+        order: 1;
+        /* Garante que o mapa venha antes do painel lateral se desejar */
+    }
+
+    #Svg_Container {
+        transform: scale(0.8);
     }
 
     /* Garante que o texto flutuante não seja muito grande */
@@ -83,42 +99,55 @@
     /* --- LATERAL DIREITA --- */
     .lateralDireita {
         width: 100%;
-        flex: none; /* Remove o flex-grow */
-        padding: var(--espacamento); /* Usa espaçamento para preencher */
-        order: 2; /* Garante que o painel lateral venha depois do mapa */
-        margin-top: var(--espacamento); /* Adiciona espaço acima */
+        flex: none;
+        /* Remove o flex-grow */
+        padding: var(--espacamento);
+        /* Usa espaçamento para preencher */
+        order: 2;
+        /* Garante que o painel lateral venha depois do mapa */
+        margin-top: var(--espacamento);
+        /* Adiciona espaço acima */
         height: auto;
         min-height: 0;
-        border-radius: var(--raio-borda); /* Garante borda em todos os cantos */
+        border-radius: var(--raio-borda);
+        /* Garante borda em todos os cantos */
     }
 
     .Escolha_bairros {
-        flex: none; /* Não precisa de flex-grow */
+        flex: none;
+        /* Não precisa de flex-grow */
         min-height: 0;
     }
 
     /* Garante que a lista de bairros não tenha altura fixa demais */
     #listaContainer {
-        overflow-y: auto; /* Mantém o scroll para a lista */
-        max-height: 300px; /* Limita a altura da lista para não dominar a tela */
+        overflow-y: auto;
+        /* Mantém o scroll para a lista */
+        max-height: 300px;
+        /* Limita a altura da lista para não dominar a tela */
         flex: none;
         margin-bottom: var(--espacamento);
     }
 
     /* Grid de informações (muda para 1 coluna ou simplifica) */
     .informacoes {
-        grid-template-columns: 2; /* Muda de grid para uma única coluna */
-        gap: 10px; /* Espaçamento menor */
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        /* duas colunas */
+        gap: 10px;
     }
 
     .nomeDoBairro {
-        grid-column: span 1; /* Ocupa apenas 1 coluna agora */
-        font-size: 1.4rem; /* Nome do bairro menor */
+        grid-column: span 1;
+        /* Ocupa apenas 1 coluna agora */
+        font-size: 1.4rem;
+        /* Nome do bairro menor */
         margin-bottom: 8px;
     }
 
     .destaque {
-        grid-column: span 1; /* Ocupa apenas 1 coluna agora */
+        grid-column: span 1;
+        /* Ocupa apenas 1 coluna agora */
         font-size: 1.1em;
     }
 
