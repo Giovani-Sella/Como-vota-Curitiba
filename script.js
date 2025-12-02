@@ -56,6 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
       carregarCSV(caminhoDadosHab, dadosHabBairros, 'Hab');
       carregarCSV(caminhoDadosRenda, dadosRendaBairros, 'Renda');
       configurarClickCamposEleitorais();
+
+
+      // 🚀 Aqui: simula o clique em “Total de votos”
+      document.getElementById("Numero_total_votos")?.click();
     })
     .catch(error => {
       console.error('Erro ao carregar SVG:', error);
@@ -253,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
       "Numero_votos_nulos",
       "Numero_votos_brancos",
       "Numero_total_moradores",
-      "RendaPercapta"           
+      "RendaPercapta"
     ];
 
     // Converter header original → novos nomes
@@ -276,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Numero_votos_nulos: parseFloat(dados.QT_VOTOS_NULOS) || 0,
         Numero_votos_brancos: parseFloat(dados.QT_VOTOS_BRANCOS) || 0,
 
-        Numero_total_moradores:  parseFloat(dados.NUMERO_TOTAL_MORADORES) || 0,
+        Numero_total_moradores: parseFloat(dados.NUMERO_TOTAL_MORADORES) || 0,
         RendaPercapta: parseFloat(dados.RENDAPERCAPTA) || 0,
 
       };
