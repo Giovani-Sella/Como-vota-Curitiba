@@ -11,7 +11,7 @@
 
   <!-- Estilo principal -->
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="main.css" />
+  <!-- <link rel="stylesheet" href="main.css" />-->
 </head>
 
 <body>
@@ -20,9 +20,10 @@
     <div class="inicial">
       <h1 class="titulo_texto">COMO VOTA CURITIBA</h1>
       <p class="titulo_texto">
-        Reportagem e site por
-        <a href="https://www.giovanisella.com.br" target="_blank">Giovani Sella</a> e
-        <a href="https://www.linkedin.com/in/rodrigomatana/" target="_blank">Rodrigo Matana</a>
+        Site construído por
+        <a href="https://www.giovanisella.com.br" target="_blank">Giovani Sella</a>
+        em parceria com
+        <a href="https://www.plural.jor.br/" target="_blank">Plural</a>.
       </p>
     </div>
 
@@ -30,13 +31,14 @@
     <div class="principal">
 
       <!-- MAPA INTERATIVO -->
-
       <div class="mapa">
-        <div id="followArea">
+        <div class="tituloMapa" id="tituloMapa">
+          <h2>Mapa de Curitiba (titulo vai ser alterado conforme visualização)</h2>
+        </div>
+        <div class="followArea" id="followArea">
           <div id="Svg_Container"></div>
           <div id="textoMouse"></div>
         </div>
-        <div class="visualozacaomapa" id="visualozacaomapa">Numero_total_votos</div>
       </div>
 
 
@@ -46,9 +48,9 @@
           <h2>Selecione um Bairro</h2>
           <div id="listaContainer"></div>
         </div>
+        <h2 id="Nome_Bairro" class="nomeDoBairro">Nenhum bairro selecionado</h2>
 
         <div class="informacoes">
-          <h2 id="Nome_Bairro" class="nomeDoBairro">Nenhum bairro selecionado</h2>
 
           <!-- COLUNA 1: Dados Eleitorais -->
           <div class="divinformacoes">
@@ -87,11 +89,6 @@
             <h2 id="PartidoMaisVotado">—</h2>
           </div>
 
-          <div class="divinformacoes destaque">
-            <h3>Vereador mais votado</h3>
-            <h2 id="VereadorMaisVotado">—</h2>
-          </div>
-
           <div class="divinformacoes">
             <h3>Total de moradores</h3>
             <h2 id="Numero_total_moradores">—</h2>
@@ -100,6 +97,11 @@
           <div class="divinformacoes">
             <h3>Renda per capita</h3>
             <h2 id="RendaPercapta">—</h2>
+          </div>
+
+          <div class="divinformacoes destaque">
+            <h3>Vereador mais votado</h3>
+            <h2 id="VereadorMaisVotado">—</h2>
           </div>
         </div>
       </div>

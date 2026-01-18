@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const listaContainer = document.getElementById('listaContainer');
   const textoMouse = document.getElementById('textoMouse');
   const containerSVG = document.getElementById('Svg_Container');
-  const visualozacaomapa = document.getElementById('visualozacaomapa');
+  const visualozacaomapa = document.getElementById('tituloMapa');
   // =============================
   // PATHS DE DADOS
   // =============================
@@ -35,17 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(svgText => {
       containerSVG.innerHTML = svgText;
       const svgElement = containerSVG.querySelector('svg');
-
       if (svgElement) {
-        Object.assign(svgElement.style, {
-          width: '100%',
-          height: '100%',
-          display: 'block',
-          transform: 'scale(1.7)',
-          transformOrigin: 'center',
-          transformBox: 'fill-box'
-        });
-        svgElement.setAttribute('viewBox', '0 0 576.00 432.00');
+        svgElement.setAttribute('viewBox', '0 0 576.00 350.00');
         svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
       }
 
@@ -98,8 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
       shape.addEventListener('click', () => atualizarBairroSelecionado(shape.id));
       shape.addEventListener('mousemove', e => {
         const rect = containerSVG.getBoundingClientRect();
-        textoMouse.style.left = `${e.clientX - rect.left + 10}px`;
-        textoMouse.style.top = `${e.clientY - rect.top + 10}px`;
+        textoMouse.style.left = `${e.clientX - rect.left + 220}px`;
+        textoMouse.style.top = `${e.clientY - rect.top + 200}px`;
       });
     });
   }
@@ -227,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       elemento.addEventListener('click', () => {
         visualizacaoSelecionada = id;
-        visualozacaomapa.textContent = visualizacaoSelecionada;
+        // visualozacaomapa.textContent = visualizacaoSelecionada;
 
         const tabelaNormalizada = criarTabelaNormalizada(dadosEleitoraisBairros);
 
@@ -344,8 +335,8 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn('Bairro não encontrado no SVG:', bairro);
       return;
     }
-    shape.setAttribute('fill', cor);
     shape.style.fill = cor;  // força a cor
+    console.warn('Bshape.style.fill = ', cor);
   }
 
 });

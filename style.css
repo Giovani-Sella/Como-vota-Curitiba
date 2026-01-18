@@ -185,28 +185,41 @@ br {
    MAPA E SVG
 ============================= */
 .mapa {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   /* permite posicionar elementos absolutos dentro */
 
   height: 100%;
+  width: 100%;
   flex: 1;
   background-color: var(--cor-fundo-card);
   border-radius: var(--raio-borda);
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+
+  align-content: center;
+}
+
+.tituloMapa {
+  padding: var(--espacamento);
+}
+
+#followArea {
+  display: flex;
+  height: 100%;
+  padding: var(--espacamento);
 }
 
 #Svg_Container {
+  display: flex;
   width: 100%;
   height: 100%;
-  position: absolute;
-  display: block;
 }
 
 #Svg_Container svg {
-  width: 100%;
-  height: 100%;
-  display: block;
+  display: flex;
+  transform: scale(1.6);
+
 }
 
 /* Estilo base dos bairros */
@@ -277,15 +290,17 @@ br {
 
 .informacoes {
   display: grid;
+  grid-template-columns: repeat(2, 1fr);
   background-color: transparent;
   color: var(--cor-texto);
   padding-bottom: var(--espacamento);
-  gap: var(--espacamento);
+  gap: 1px;
   flex-shrink: 0;
+  flex: 1;
+
 }
 
 .nomeDoBairro {
-  grid-column: span 3;
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--cor-primaria);
@@ -309,24 +324,25 @@ br {
 /* Bloco individual de informação */
 .divinformacoes {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   padding: 8px 10px;
   background: #f7f7f7;
   border-radius: 6px;
 }
 
 .divinformacoes h3 {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 500;
   color: #555;
-  margin: 0 0 4px 0;
+  margin: 0 0 0 4px;
 }
 
 .divinformacoes h2 {
   color: var(--cor-primaria);
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin: 0;
+  margin: 0 0 0 5px;
+  height: fit-content;
 }
 
 /* Sub-blocos com número e porcentagem lado a lado */
@@ -339,8 +355,9 @@ br {
 }
 
 .destaque {
-  grid-column: span 3;
   /* ocupa duas colunas */
+  grid-column: span 2;
+
   background: #d9e7ff;
   font-size: 1.2em;
   font-weight: bold;
