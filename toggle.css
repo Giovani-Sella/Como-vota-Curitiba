@@ -1,0 +1,77 @@
+:root {
+  --cor-fundo: #fff7d9;
+  --cor-fundo-card: #ffffff;
+  --cor-borda: #ccc;
+  --cor-texto: #222;
+  --cor-primaria: #fccb00;
+  --cor-secundaria: #242021;
+  --raio-borda: 20px;
+  --espacamento: 20px;
+}
+
+/* ------------- toggle-switch ------------- */
+
+/* Container */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;      /* 80 → 40 */
+    height: 20px;     /* 40 → 20 */
+    cursor: pointer;
+}
+
+.toggle-switch input[type="checkbox"] {
+    display: none;
+}
+
+/* Background */
+.toggle-switch-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ddd;
+    border-radius: 10px; /* 20 → 10 */
+    box-shadow: inset 0 0 0 1px #ccc; /* 2px → 1px */
+    transition: background-color 0.3s ease-in-out;
+}
+
+/* Handle */
+.toggle-switch-handle {
+    position: absolute;
+    top: 2.5px;   /* 5 → 2.5 */
+    left: 2.5px;
+    width: 15px;  /* 30 → 15 */
+    height: 15px;
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Texto opcional */
+.toggle-switch::before {
+    content: "";
+    position: absolute;
+    top: -12.5px;   /* -25 → -12.5 */
+    right: -17.5px; /* -35 → -17.5 */
+    font-size: 6px; /* 12 → 6 */
+    font-weight: bold;
+    color: #aaa;
+    text-shadow: 0.5px 0.5px #fff;
+    transition: color 0.3s ease-in-out;
+}
+
+/* Checked */
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch-background .toggle-switch-handle {
+    transform: translateX(20px); /* 40–45 → 20 */
+    box-shadow: 
+        0 1px 3px rgba(0, 0, 0, 0.2),
+        0 0 0 1.5px var(--cor-texto);
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch-background {
+    background-color: var(--cor-texto);
+    box-shadow: inset 0 0 0 1px var(--cor-texto);
+}

@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+  document.querySelector(".principal").classList.add("blur");
+
   // =============================
   // ELEMENTOS DO DOM
   // =============================
@@ -7,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const textoMouse = document.getElementById('textoMouse');
   const containerSVG = document.getElementById('Svg_Container');
   const visualozacaomapa = document.getElementById('tituloMapa');
+  const UsarDadosRelativos = document.getElementById('UsarDadosRelativos');
+
   // =============================
   // PATHS DE DADOS
   // =============================
@@ -36,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
       containerSVG.innerHTML = svgText;
       const svgElement = containerSVG.querySelector('svg');
       if (svgElement) {
-        svgElement.setAttribute('viewBox', '0 0 576.00 350.00');
+        svgElement.setAttribute('viewBox', '0 0 576.00 400.00');
         svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
       }
 
@@ -149,35 +154,53 @@ document.addEventListener('DOMContentLoaded', () => {
   // =============================
 
   function atualizarPainelInformacoes(bairroNome) {
-    const bairro = bairroNome.toUpperCase();
+    const bairro = bairroNome?.toUpperCase?.() || '';
 
     const dadosEleitorais = dadosEleitoraisBairros[bairro] || {};
     const dadosHab = dadosHabBairros[bairro] || {};
     const dadosRenda = dadosRendaBairros[bairro] || {};
 
-    const getNumero = v => (isNaN(parseFloat(v)) ? 0 : parseFloat(v));
+    const getNumero = v => {
+      const n = parseFloat(v);
+      return isNaN(n) ? null : n;
+    };
+
     const votosTotais = getNumero(dadosEleitorais['QT_VOTOS_TOTAIS']);
     const votosNegros = getNumero(dadosEleitorais['QT_VOTOS_NEGROS']);
     const votosMulheres = getNumero(dadosEleitorais['QT_VOTOS_MULHERES']);
     const votosNulos = getNumero(dadosEleitorais['QT_VOTOS_NULOS']);
     const votosBrancos = getNumero(dadosEleitorais['QT_VOTOS_BRANCOS']);
 
-    const pct = (parte, total) => total > 0 ? `${((parte * 100) / total).toFixed(2)}%` : '—';
+    const pct = (parte, total) =>
+      total > 0 && parte !== null
+        ? `${((parte * 100) / total).toFixed(2)}%`
+        : '—';
+
+    // Alterna visibilidade
+    document.getElementById('Porcentagem_votos_pessoas_negras').classList.toggle('hidden', !mostrarPorcentagem);
+    document.getElementById('Porcentagem_votos_mulheres').classList.toggle('hidden', !mostrarPorcentagem);
+
+    document.getElementById('Numero_votos_mulheres').classList.toggle('hidden', mostrarPorcentagem);
+    document.getElementById('Numero_votos_pessoas_negras').classList.toggle('hidden', mostrarPorcentagem);
 
     // Atualiza campos eleitorais
-    document.getElementById('Numero_total_votos').textContent = votosTotais || '—';
-    document.getElementById('Numero_votos_pessoas_negras').textContent = votosNegros || '—';
+    document.getElementById('Numero_total_votos').textContent = votosTotais ?? '—';
+    document.getElementById('Numero_votos_pessoas_negras').textContent = votosNegros ?? '—';
     document.getElementById('Porcentagem_votos_pessoas_negras').textContent = pct(votosNegros, votosTotais);
-    document.getElementById('Numero_votos_mulheres').textContent = votosMulheres || '—';
+    document.getElementById('Numero_votos_mulheres').textContent = votosMulheres ?? '—';
     document.getElementById('Porcentagem_votos_mulheres').textContent = pct(votosMulheres, votosTotais);
-    document.getElementById('Numero_votos_nulos').textContent = votosNulos || '—';
-    document.getElementById('Numero_votos_brancos').textContent = votosBrancos || '—';
+    document.getElementById('Numero_votos_nulos').textContent = votosNulos ?? '—';
+    document.getElementById('Numero_votos_brancos').textContent = votosBrancos ?? '—';
     document.getElementById('PartidoMaisVotado').textContent = dadosEleitorais['PARTIDO_MAIS_VOTADO'] || '—';
     document.getElementById('VereadorMaisVotado').textContent = dadosEleitorais['VEREADOR_MAIS_VOTADO'] || '—';
-    // Atualiza campos habitacionais / socioeconômicos
-    document.getElementById('Numero_total_moradores').textContent = dadosHab['2024'] || '—';
+
+    // Dados habitacionais / renda
+    document.getElementById('Numero_total_moradores').textContent = dadosHab['2024'] ?? '—';
     document.getElementById('RendaPercapta').textContent = formatarRenda(dadosRenda['2010']);
   }
+
+
+
 
   // =============================
   // formata Renda
@@ -230,9 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
           pintarBairroSVG(nomeBairro, cor);
         });
       });
-
     });
-
   }
 
   function criarTabelaNormalizada(dadosEleitoraisBairros) {
@@ -300,7 +321,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       return novaLinha;
     });
-
     return tabelaNormalizada;
   }
 
@@ -340,5 +360,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
-
 

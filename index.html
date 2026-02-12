@@ -11,6 +11,7 @@
 
   <!-- Estilo principal -->
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="toggle.css" />
   <!-- <link rel="stylesheet" href="main.css" />-->
 </head>
 
@@ -49,7 +50,15 @@
           <div id="listaContainer"></div>
         </div>
         <h2 id="Nome_Bairro" class="nomeDoBairro">Nenhum bairro selecionado</h2>
-
+        <div class="containerOpcaoToggle">
+          <h3>Usar dados relativos a população </h3>
+          <label class="toggle-switch">
+            <input type="checkbox" id="permitirSaltos">
+            <div class="toggle-switch-background">
+              <div class="toggle-switch-handle"></div>
+            </div>
+          </label>
+        </div>
         <div class="informacoes">
 
           <!-- COLUNA 1: Dados Eleitorais -->

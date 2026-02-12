@@ -2,15 +2,14 @@
    VARIÁVEIS GERAIS
 ============================= */
 :root {
-  --cor-fundo: aliceblue;
+  --cor-fundo: #fff7d9;
   --cor-fundo-card: #ffffff;
   --cor-borda: #ccc;
   --cor-texto: #222;
-  --cor-primaria: #0078d7;
-  --cor-secundaria: #99d9ea;
+  --cor-primaria: #fccb00;
+  --cor-secundaria: #242021;
   --raio-borda: 20px;
   --espacamento: 20px;
-
 }
 
 /* =============================
@@ -49,6 +48,15 @@ br {
   margin-bottom: 2px;
   font-size: 2px;
   line-height: 2px;
+}
+
+a {
+  color: #d9af00;
+
+}
+
+.hidden {
+    display: none;
 }
 
 /* =============================
@@ -288,6 +296,14 @@ br {
   flex: 1;
 }
 
+.containerOpcaoToggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--espacamento);
+
+}
+
 .informacoes {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -328,6 +344,7 @@ br {
   padding: 8px 10px;
   background: #f7f7f7;
   border-radius: 6px;
+  height: fit-content;
 }
 
 .divinformacoes h3 {
