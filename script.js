@@ -1,7 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-
-  document.querySelector(".principal").classList.add("blur");
-
   // =============================
   // ELEMENTOS DO DOM
   // =============================
