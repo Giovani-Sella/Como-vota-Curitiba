@@ -44,13 +44,6 @@
         height: auto;
     }
 
-    .principal.blur {
-        filter: blur(6px);
-        pointer-events: none;
-        user-select: none;
-    }
-
-
     .margemTexto {
         padding-left: var(--espacamento);
         padding-right: var(--espacamento);

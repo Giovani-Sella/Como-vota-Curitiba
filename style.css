@@ -56,7 +56,7 @@ a {
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 /* =============================
@@ -90,6 +90,57 @@ a {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.principal {
+  position: relative;
+  z-index: 0;
+  /* cria contexto local */
+  overflow: hidden;
+  /* impede o overlay de escapar */
+}
+
+
+.blur-overlay {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.4);
+  z-index: 4;
+}
+
+/* camada por cima */
+.aviso-construcao {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.6);
+
+  z-index: 10;
+}
+
+/* caixa do aviso */
+.box-aviso {
+  background: white;
+  padding: 32px 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  max-width: 400px;
+}
+
+.box-aviso h2 {
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.box-aviso p {
+  margin: 0;
+  color: #555;
 }
 
 .reportagens {
