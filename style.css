@@ -242,7 +242,7 @@ a {
   justify-content: flex-start;
   scroll-snap-align: end;
   gap: 0;
-  -webkit-text-fill-color: var(--cor-fundo);
+  -webkit-text-fill-color: var(--cor-secundaria);
 }
 
 .textoRodape {
