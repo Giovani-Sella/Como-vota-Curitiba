@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let dadosEleitoraisBairros = {};
   let dadosHabBairros = {};
   let dadosRendaBairros = {};
+  let mostrarPorcentagem = false;
+  let visualizacaoSelecionada = 'Numero_total_votos';
+  let todosBairros = false;
 
   // =============================
   // CARREGAMENTO DO SVG
@@ -49,10 +52,52 @@ document.addEventListener('DOMContentLoaded', () => {
       carregarCSV(caminhoDadosHab, dadosHabBairros, 'Hab');
       carregarCSV(caminhoDadosRenda, dadosRendaBairros, 'Renda');
       configurarClickCamposEleitorais();
-
-
-      // 🚀 Aqui: simula o clique em “Total de votos”
-      document.getElementById("Numero_total_votos")?.click();
+      atualizarTituloMapa(visualizacaoSelecionada);
+      
+      // Listener para o toggle de porcentagens
+      const checkboxPorcentagem = document.getElementById('permitirSaltos');
+      if (checkboxPorcentagem) {
+        checkboxPorcentagem.addEventListener('change', (e) => {
+          mostrarPorcentagem = e.target.checked;
+          
+          // Atualiza o painel
+          if (todosBairros) {
+            atualizarPainelTodosBairros();
+          } else if (bairroSelecionado) {
+            atualizarPainelInformacoes(bairroSelecionado);
+          }
+          
+          // Alterna entre visualizações de números e porcentagens no mapa
+          if (visualizacaoSelecionada === 'Numero_votos_pessoas_negras') {
+            visualizacaoSelecionada = mostrarPorcentagem ? 'Porcentagem_votos_pessoas_negras' : 'Numero_votos_pessoas_negras';
+          } else if (visualizacaoSelecionada === 'Porcentagem_votos_pessoas_negras') {
+            visualizacaoSelecionada = mostrarPorcentagem ? 'Porcentagem_votos_pessoas_negras' : 'Numero_votos_pessoas_negras';
+          } else if (visualizacaoSelecionada === 'Numero_votos_mulheres') {
+            visualizacaoSelecionada = mostrarPorcentagem ? 'Porcentagem_votos_mulheres' : 'Numero_votos_mulheres';
+          } else if (visualizacaoSelecionada === 'Porcentagem_votos_mulheres') {
+            visualizacaoSelecionada = mostrarPorcentagem ? 'Porcentagem_votos_mulheres' : 'Numero_votos_mulheres';
+          }
+          
+          // Atualiza o destaque visual e o mapa
+          atualizarDestaque();
+          
+          const tabelaNormalizada = criarTabelaNormalizada(dadosEleitoraisBairros);
+          tabelaNormalizada.forEach(bairroObj => {
+            const nomeBairro = bairroObj.bairro;
+            const cor = getCorBairro(nomeBairro, visualizacaoSelecionada, tabelaNormalizada);
+            pintarBairroSVG(nomeBairro, cor);
+          });
+        });
+      }
+      // Seleciona todos os bairros por padrão e exibe total de votos
+      setTimeout(() => {
+        selecionarTodosBairros();
+        // Inicializa a visualização de total de votos
+        const divAtivo = document.querySelector('[data-visualization="Numero_total_votos"]');
+        if (divAtivo) {
+          divAtivo.click();
+        }
+      }, 500);
     })
     .catch(error => {
       console.error('Erro ao carregar SVG:', error);
@@ -64,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // =============================
 
   function atualizarBairroSelecionado(nome) {
+    todosBairros = false;
     bairroSelecionado = nome;
     nomeBairro.textContent = nome;
 
@@ -72,6 +118,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (shape) shape.classList.add('selected');
 
     atualizarPainelInformacoes(nome);
+  }
+
+  // =============================
+  // SELECIONA TODOS OS BAIRROS
+  // =============================
+  function selecionarTodosBairros() {
+    todosBairros = true;
+    bairroSelecionado = '';
+    nomeBairro.textContent = 'Todos os bairros';
+
+    containerSVG.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
+    atualizarPainelTodosBairros();
+    atualizarTituloMapa(visualizacaoSelecionada);
+    gerarLista();
   }
 
   // =============================
@@ -102,16 +162,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function gerarLista() {
     listaContainer.innerHTML = '';
+    
+    // Adiciona "Todos os bairros" como primeiro item
+    const itemTodosBairros = document.createElement('div');
+    itemTodosBairros.className = 'item';
+    itemTodosBairros.textContent = 'Todos os bairros';
+    
+    if (todosBairros) {
+      itemTodosBairros.classList.add('ativo');
+    }
+    
+    itemTodosBairros.addEventListener('click', () => selecionarTodosBairros());
+    listaContainer.appendChild(itemTodosBairros);
+    
+    // Adiciona os bairros individuais
     containerSVG.querySelectorAll('svg [id]').forEach(shape => {
-
-      if (shape.id === bairroSelecionado) {
-        item.classList.add('ativo');
-      }
-
       if (!shape.id) return;
       const item = document.createElement('div');
       item.className = 'item';
       item.textContent = shape.id;
+      
+      if (shape.id === bairroSelecionado) {
+        item.classList.add('ativo');
+      }
+
       item.addEventListener('click', () => atualizarBairroSelecionado(shape.id));
       listaContainer.appendChild(item);
     });
@@ -144,6 +218,60 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`CSV ${tipo} carregado:`, objetoDestino);
       })
       .catch(error => console.error(`Erro ao carregar CSV ${tipo}:`, error));
+  }
+
+  // =============================
+  // ATUALIZAÇÃO DO PAINEL TODOS OS BAIRROS
+  // =============================
+  function atualizarPainelTodosBairros() {
+    // Soma todos os dados de todos os bairros
+    let votosTotaisSum = 0;
+    let votosNegrosSum = 0;
+    let votosMulheresSum = 0;
+    let votosNulosSum = 0;
+    let votosBrancosSum = 0;
+    let moradoresTotalSum = 0;
+
+    Object.keys(dadosEleitoraisBairros).forEach(bairro => {
+      const dados = dadosEleitoraisBairros[bairro];
+      votosTotaisSum += parseFloat(dados['QT_VOTOS_TOTAIS']) || 0;
+      votosNegrosSum += parseFloat(dados['QT_VOTOS_NEGROS']) || 0;
+      votosMulheresSum += parseFloat(dados['QT_VOTOS_MULHERES']) || 0;
+      votosNulosSum += parseFloat(dados['QT_VOTOS_NULOS']) || 0;
+      votosBrancosSum += parseFloat(dados['QT_VOTOS_BRANCOS']) || 0;
+    });
+
+    Object.keys(dadosHabBairros).forEach(bairro => {
+      const dados = dadosHabBairros[bairro];
+      moradoresTotalSum += parseFloat(dados['2024']) || 0;
+    });
+
+    const pct = (parte, total) =>
+      total > 0 && parte !== null
+        ? `${((parte * 100) / total).toFixed(2)}%`
+        : '—';
+
+    // Alterna visibilidade
+    document.getElementById('Porcentagem_votos_pessoas_negras').classList.toggle('hidden', !mostrarPorcentagem);
+    document.getElementById('Porcentagem_votos_mulheres').classList.toggle('hidden', !mostrarPorcentagem);
+
+    document.getElementById('Numero_votos_mulheres').classList.toggle('hidden', mostrarPorcentagem);
+    document.getElementById('Numero_votos_pessoas_negras').classList.toggle('hidden', mostrarPorcentagem);
+
+    // Atualiza campos eleitorais com os totais
+    document.getElementById('Numero_total_votos').textContent = votosTotaisSum || '—';
+    document.getElementById('Numero_votos_pessoas_negras').textContent = votosNegrosSum || '—';
+    document.getElementById('Porcentagem_votos_pessoas_negras').textContent = pct(votosNegrosSum, votosTotaisSum);
+    document.getElementById('Numero_votos_mulheres').textContent = votosMulheresSum || '—';
+    document.getElementById('Porcentagem_votos_mulheres').textContent = pct(votosMulheresSum, votosTotaisSum);
+    document.getElementById('Numero_votos_nulos').textContent = votosNulosSum || '—';
+    document.getElementById('Numero_votos_brancos').textContent = votosBrancosSum || '—';
+    document.getElementById('PartidoMaisVotado').textContent = '—';
+    document.getElementById('VereadorMaisVotado').textContent = '—';
+
+    // Dados habitacionais / renda
+    document.getElementById('Numero_total_moradores').textContent = moradoresTotalSum || '—';
+    document.getElementById('RendaPercapta').textContent = '—';
   }
 
   // =============================
@@ -200,6 +328,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // =============================
+  // Mapa de títulos para cada visualização
+  // =============================
+  const titulosVisualizacao = {
+    'Numero_total_votos': 'Número total de votos em 2024 por bairro de Curitiba',
+    'Numero_votos_pessoas_negras': 'Número total de votos em 2024 em pessoas negras por bairro de Curitiba',
+    'Porcentagem_votos_pessoas_negras': 'Porcentagem de votos em 2024 em pessoas negras por bairro de Curitiba',
+    'Numero_votos_mulheres': 'Número total de votos em 2024 em mulheres por bairro de Curitiba',
+    'Porcentagem_votos_mulheres': 'Porcentagem de votos em 2024 em mulheres por bairro de Curitiba',
+    'Numero_votos_nulos': 'Número total de votos em 2024 nulos por bairro de Curitiba',
+    'Numero_votos_brancos': 'Número total de votos em 2024 brancos por bairro de Curitiba',
+    'Numero_total_moradores': 'Número total de moradores por bairro de Curitiba',
+    'RendaPercapta': 'Renda per capita por bairro de Curitiba'
+  };
+
+  // =============================
+  // Atualiza o título do mapa
+  // =============================
+  function atualizarTituloMapa(nomeVisualizacao) {
+    const tituloMapa = document.getElementById('tituloMapa');
+    if (tituloMapa) {
+      const h2 = tituloMapa.querySelector('h2');
+      if (h2) {
+        h2.textContent = titulosVisualizacao[nomeVisualizacao] || 'Mapa de Curitiba';
+      }
+    }
+  }
+
+  // =============================
   // formata Renda
   // =============================
 
@@ -216,11 +372,52 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =============================
+  // Atualiza o destaque visual dos informações
+  // =============================
+  function atualizarDestaque() {
+    // Remove a classe ativo de todos os divinformacoes
+    document.querySelectorAll('.divinformacoes').forEach(elem => {
+      elem.classList.remove('ativo');
+    });
+    
+    // Mapeamento de porcentagens para seus números correspondentes
+    let visualizacaoParaDestaque = visualizacaoSelecionada;
+    if (visualizacaoSelecionada === 'Porcentagem_votos_pessoas_negras') {
+      visualizacaoParaDestaque = 'Numero_votos_pessoas_negras';
+    } else if (visualizacaoSelecionada === 'Porcentagem_votos_mulheres') {
+      visualizacaoParaDestaque = 'Numero_votos_mulheres';
+    }
+    
+    // Adiciona a classe ativo ao divinformacoes correspondente
+    const divAtivo = document.querySelector(`[data-visualization="${visualizacaoParaDestaque}"]`);
+    if (divAtivo) {
+      divAtivo.classList.add('ativo');
+    }
+  }
+
+  // =============================
+  // Determina a visualização correta baseado no toggle
+  // =============================
+  function obterVisualizacaoCorreta(campoClicado) {
+    // Se o toggle está ativado E o campo tem uma versão em porcentagem, retorna a versão em %
+    if (mostrarPorcentagem) {
+      if (campoClicado === 'Numero_votos_pessoas_negras') {
+        return 'Porcentagem_votos_pessoas_negras';
+      } else if (campoClicado === 'Numero_votos_mulheres') {
+        return 'Porcentagem_votos_mulheres';
+      }
+    }
+    // Caso contrário, retorna o campo como foi clicado
+    return campoClicado;
+  }
+
+  // =============================
   // Seleciona todos os campos eleitorais que devem atualizar visualizacaoSelecionada
   // =============================
 
   function configurarClickCamposEleitorais() {
-    const camposEleitorais = [
+    // Lista de campos que podem ser visualizados no mapa
+    const camposVizualizaveis = [
       "Numero_total_votos",
       "Numero_votos_pessoas_negras",
       "Porcentagem_votos_pessoas_negras",
@@ -232,25 +429,32 @@ document.addEventListener('DOMContentLoaded', () => {
       "RendaPercapta"
     ];
 
-    camposEleitorais.forEach(id => {
-      const elemento = document.getElementById(id);
-      if (!elemento) return;
+    // Adiciona listeners apenas aos divinformacoes que têm visualização de mapa
+    document.querySelectorAll('.divinformacoes').forEach(div => {
+      const id = div.getAttribute('data-visualization');
+      if (!id || !camposVizualizaveis.includes(id)) return;
 
-      elemento.addEventListener('click', () => {
-        visualizacaoSelecionada = id;
-        // visualozacaomapa.textContent = visualizacaoSelecionada;
+      div.addEventListener('click', () => {
+        // Obtém a visualização correta baseado no toggle
+        const idCorreto = obterVisualizacaoCorreta(id);
+        visualizacaoSelecionada = idCorreto;
+        atualizarTituloMapa(idCorreto);
+        atualizarDestaque();
 
         const tabelaNormalizada = criarTabelaNormalizada(dadosEleitoraisBairros);
 
         // Percorre TODOS os bairros da tabela normalizada
         tabelaNormalizada.forEach(bairroObj => {
           const nomeBairro = bairroObj.bairro;
-          const cor = getCorBairro(nomeBairro, id, tabelaNormalizada);
+          const cor = getCorBairro(nomeBairro, idCorreto, tabelaNormalizada);
 
           pintarBairroSVG(nomeBairro, cor);
         });
       });
     });
+
+    // Marca a visualização inicial como ativa
+    atualizarDestaque();
   }
 
   function criarTabelaNormalizada(dadosEleitoraisBairros) {
