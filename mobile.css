@@ -6,6 +6,7 @@
     /* --- VARIÁVEIS GERAIS (Ajuste de Espaçamento) --- */
     :root {
         --espacamento: 10px;
+        --raio-borda: 10px;
     }
 
     /* --- BASE --- */
@@ -19,10 +20,6 @@
         font-size: clamp(2rem, 10vw, 3rem);
     }
 
-    p {
-        font-size: 1rem;
-    }
-
     /* --- SEÇÕES PRINCIPAIS --- */
     .inicial,
     .principal,
@@ -31,10 +28,10 @@
     .paginaReportagem,
     .paginaBaseados {
         scroll-snap-align: start;
-        height: auto;
+        height: fit-content;
         min-height: 100vh;
-        padding-top: var(--espacamento);
-        padding-bottom: var(--espacamento);
+        padding-top: 0;
+        padding-bottom: 0;
     }
 
     .principal {
@@ -73,11 +70,12 @@
 
     #Svg_Container {
         transform: scale(0.7);
-        margin-top: -150px;
+        margin-top: -160px;
     }
 
     #textoMouse {
         max-width: 80%;
+        appearance: none;
     }
 
     .tituloMapa {
@@ -89,7 +87,7 @@
         flex: none;
         padding: var(--espacamento);
         order: 2;
-        margin-top: var(--espacamento);
+        margin-top: 0;
         height: auto;
         border-radius: var(--raio-borda);
 
@@ -104,6 +102,8 @@
         min-height: 0;
         font-size: 0.8rem;
         gap: 1px;
+        margin-top: 0;
+        padding-top: 0;
     }
 
     #listaContainer {
@@ -152,7 +152,8 @@
     }
 
     .divinformacoes h2 {
-        font-size: 0.8rem;
+        font-size: 0.8rem !important;
+        padding-top: 0;
     }
 
     /* --- SELECTOR DE VISUALIZAÇÃO --- */
