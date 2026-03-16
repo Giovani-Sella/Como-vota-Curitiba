@@ -1,3 +1,24 @@
+// =============================
+// POPUP DE AVISO DE CONSTRUÇÃO
+// =============================
+const avisoOverlay = document.getElementById('avisoOverlay');
+const fecharAvisoBtn = document.getElementById('fecharAviso');
+
+if (fecharAvisoBtn) {
+  fecharAvisoBtn.addEventListener('click', () => {
+    avisoOverlay.style.display = 'none';
+  });
+}
+
+// Fecha o aviso também ao clicar no overlay
+if (avisoOverlay) {
+  avisoOverlay.addEventListener('click', (e) => {
+    if (e.target === avisoOverlay) {
+      avisoOverlay.style.display = 'none';
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // =============================
   // ELEMENTOS DO DOM
