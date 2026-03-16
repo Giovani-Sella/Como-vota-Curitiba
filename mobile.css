@@ -5,7 +5,7 @@
 
     /* --- VARIÁVEIS GERAIS (Ajuste de Espaçamento) --- */
     :root {
-        --espacamento: 15px;
+        --espacamento: 10px;
     }
 
     /* --- BASE --- */
@@ -41,12 +41,14 @@
         flex-direction: column;
         padding-left: var(--espacamento);
         padding-right: var(--espacamento);
-        height: auto;
+        padding-top: 0%;
+        height: 100vh;
     }
 
     .margemTexto {
         padding-left: var(--espacamento);
         padding-right: var(--espacamento);
+        padding-top: 0;
     }
 
     .rodape {
@@ -71,13 +73,17 @@
 
     #Svg_Container {
         transform: scale(0.7);
+        margin-top: -150px;
     }
 
     #textoMouse {
         max-width: 80%;
     }
 
-    /* --- LATERAL DIREITA (AGORA LADO A LADO) --- */
+    .tituloMapa {
+        font-size: 0.8rem;
+    }
+
     .lateralDireita {
         width: 100%;
         flex: none;
@@ -85,68 +91,78 @@
         order: 2;
         margin-top: var(--espacamento);
         height: auto;
-        min-height: 0;
         border-radius: var(--raio-borda);
 
-        /* IMPORTANTE — deixa lado a lado */
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-        gap: 10px;
+        gap: 0px;
     }
 
     /* --- SELEÇÃO DE BAIRROS (ESQUERDA) --- */
     .Escolha_bairros {
-        width: 45%;
+        width: 100%;
         flex: none;
         overflow-y: auto;
         min-height: 0;
+        font-size: 0.8rem;
+        gap: 1px;
     }
 
     #listaContainer {
         overflow-y: auto;
-        max-height: 280px;
+        max-height: 100px;
         flex: none;
-        margin-bottom: var(--espacamento);
+        margin-bottom: 0;
+        gap: 0px;
     }
 
     #listaContainer li {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 
     /* --- INFORMAÇÕES (DIREITA) --- */
 
     .informacoes {
-        width: 55%;
+        width: 100%;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+        gap: 2px;
     }
 
     .nomeDoBairro {
         grid-column: span 2;
-        font-size: 1.3rem;
-        margin-bottom: 5px;
+        font-size: 1rem;
+        margin-bottom: var(--espacamento);
+    }
+
+    .containerOpcaoToggle {
+        font-size: 0.8rem;
+
+    }
+
+    .Nome_Bairro {
+        font-size: 1rem;
     }
 
     .destaque {
-        font-size: 1rem;
-        grid-column: span 1;
+        font-size: 0.8rem;
+        grid-column: span 2;
     }
 
-    .divinformacoes h3,
+    .divinformacoes h3 {
+        font-size: 0.8rem;
+    }
+
     .divinformacoes h2 {
-        font-size: 0.7rem;
+        font-size: 0.8rem;
     }
 
     /* --- SELECTOR DE VISUALIZAÇÃO --- */
     .seletor {
-        gap: 8px;
-        margin: 15px 0;
+        gap: 0px;
+        margin: 2px 0;
     }
 
     .seletor .opcao {
-        padding: 6px 0;
+        padding: 2px 0;
         font-size: 10px;
     }
 }
