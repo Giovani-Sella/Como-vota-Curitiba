@@ -19,3 +19,14 @@ self.addEventListener("fetch", event => {
       .then(response => response || fetch(event.request))
   );
 });
+
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  console.log("PWA pode ser instalado");
+
+  // aqui você pode mostrar um botão personalizado depois
+});
