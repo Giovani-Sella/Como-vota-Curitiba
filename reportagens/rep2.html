@@ -11,6 +11,8 @@
 
   <!-- Estilo principal -->
   <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/toggle.css" />
+  <link rel="stylesheet" href="../css/mobile.css" />
 </head>
 
 <body>
@@ -46,96 +48,7 @@
     </div>
 
     <!-- SEÇÃO PRINCIPAL -->
-    <div class="principal">
-
-      <div class="mapa">
-        <div id="followArea">
-          <div id="Svg_Container"></div>
-          <div id="textoMouse"></div>
-        </div>
-        <div class="visualozacaomapa" id="visualozacaomapa">Numero_total_votos</div>
-      </div>
-
-
-      <!-- PAINEL LATERAL -->
-      <div class="lateralDireita">
-        <div class="Escolha_bairros">
-          <h2>Selecione um Bairro</h2>
-          <div id="listaContainer"></div>
-        </div>
-
-        <div class="informacoes">
-          <h2 id="Nome_Bairro" class="nomeDoBairro">Nenhum bairro selecionado</h2>
-
-          <!-- COLUNA 1: Dados Eleitorais -->
-          <div class="divinformacoes">
-            <h3>Total de votos</h3>
-            <h2 id="Numero_total_votos">—</h2>
-          </div>
-
-          <div class="divinformacoes">
-            <h3>Em pessoas negras</h3>
-            <div class="subdivinformacoes">
-              <h2 id="Numero_votos_pessoas_negras">—</h2>
-              <h2 id="Porcentagem_votos_pessoas_negras">—</h2>
-            </div>
-          </div>
-
-          <div class="divinformacoes">
-            <h3>Em mulheres</h3>
-            <div class="subdivinformacoes">
-              <h2 id="Numero_votos_mulheres">—</h2>
-              <h2 id="Porcentagem_votos_mulheres">—</h2>
-            </div>
-          </div>
-
-          <div class="divinformacoes">
-            <h3>Votos nulos</h3>
-            <h2 id="Numero_votos_nulos">—</h2>
-          </div>
-
-          <div class="divinformacoes">
-            <h3>Votos brancos</h3>
-            <h2 id="Numero_votos_brancos">—</h2>
-          </div>
-
-          <div class="divinformacoes">
-            <h3>Partido mais votado</h3>
-            <h2 id="PartidoMaisVotado">—</h2>
-          </div>
-
-          <div class="divinformacoes destaque">
-            <h3>Vereador mais votado</h3>
-            <h2 id="VereadorMaisVotado">—</h2>
-          </div>
-
-          <div class="divinformacoes">
-            <h3>Total de moradores</h3>
-            <h2 id="Numero_total_moradores">—</h2>
-          </div>
-
-          <div class="divinformacoes">
-            <h3>Renda per capita</h3>
-            <h2 id="RendaPercapta">—</h2>
-          </div>
-        </div>
-      </div>
-
-      <!-- AVISO DE SITE EM CONSTRUÇÃO 
-      <div class="blur-overlay"></div>
-
-      <div class="aviso-construcao">
-        <div class="box-aviso">
-          <h2>AVISO! </h2>
-          <p> Esse site ainda está em construção.</p>
-          <p> Acompanhe o lancamento no </p>
-          <a href="https://www.plural.jor.br/" target="_blank">Plural</a>.
-
-        </div>
-      </div> -->
-      <!-- AVISO DE SITE EM CONSTRUÇÃO -->
-
-    </div>
+    <div class="principal" id="mapa-painel"></div>
 
     <div class="margemTexto">
 
@@ -315,7 +228,9 @@
   </div>
 
   <!-- Scripts -->
-  <script src="rep2.js"></script>
+  <script src="../componentes/mapa-painel.js"></script>
+  <script>injetarMapaPainel('mapa-painel');</script>
+  <script src="../js/script.js"></script>
 
 </body>
 

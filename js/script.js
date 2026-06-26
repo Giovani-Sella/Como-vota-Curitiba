@@ -1,3 +1,9 @@
+// Calcula a URL raiz do projeto a partir do próprio script, funciona de qualquer página
+const _base = (() => {
+  const src = document.currentScript?.src;
+  return src ? new URL('..', src).href.replace(/\/$/, '') : '.';
+})();
+
 // =============================
 // POPUP DE AVISO DE CONSTRUÇÃO
 // =============================
@@ -33,10 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // =============================
   // PATHS DE DADOS
   // =============================
-  const svgPath = './dados/bairros_curitiba.svg';
-  const caminhoDadosEleitorais = './dados/Dados_eleitorais_vereadores_por_bairro_CWB.csv';
-  const caminhoDadosHab = './dados/DB_HAB_INFOCURITIBA.csv';
-  const caminhoDadosRenda = './dados/DB_RENDA_INFOCURITIBA.csv';
+  const svgPath = `${_base}/dados/bairros_curitiba.svg`;
+  const caminhoDadosEleitorais = `${_base}/dados/Dados_eleitorais_vereadores_por_bairro_CWB.csv`;
+  const caminhoDadosHab = `${_base}/dados/DB_HAB_INFOCURITIBA.csv`;
+  const caminhoDadosRenda = `${_base}/dados/DB_RENDA_INFOCURITIBA.csv`;
 
   // =============================
   // VARIÁVEIS GLOBAIS
@@ -46,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let dadosEleitoraisBairros = {};
   let dadosHabBairros = {};
   let dadosRendaBairros = {};
-  let mostrarPorcentagem = false;
+  let mostrarPorcentagem = true;
   let visualizacaoSelecionada = 'Numero_total_votos';
   let todosBairros = false;
 
@@ -78,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Listener para o toggle de porcentagens
       const checkboxPorcentagem = document.getElementById('permitirSaltos');
       if (checkboxPorcentagem) {
+        checkboxPorcentagem.checked = true;
         checkboxPorcentagem.addEventListener('change', (e) => {
           mostrarPorcentagem = e.target.checked;
           
