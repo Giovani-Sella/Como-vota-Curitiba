@@ -2,8 +2,8 @@ const CACHE_NAME = "como-vota-curitiba-v1";
 const urlsToCache = [
   "/",
   "/index.html",
-  "/style.css",
-  "/script.js"
+  "/css/style.css",
+  "/js/script.js"
 ];
 
 self.addEventListener("install", event => {
