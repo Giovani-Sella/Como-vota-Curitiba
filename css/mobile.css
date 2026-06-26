@@ -13,6 +13,7 @@
     body {
         scroll-snap-type: none;
         height: auto;
+        overflow-x: hidden;
     }
 
     h1 {
@@ -31,7 +32,7 @@
         min-height: 100vh;
         padding-top: 0;
         padding-bottom: 0;
-        max-width: 100vh;
+        max-width: 100%;
     }
 
     .principal {

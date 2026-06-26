@@ -69,41 +69,18 @@
       </div>
     </div>
 
-    <div class="paginaBaseados">
-      <div class="margemTexto">
-        <h1>Reportagens baseadas em nós</h1>
+    <div class="paginaBaseados" id="reportagens-lista"></div>
 
-        <div class="reportagens">
-          <div class="reportagem" id="Votos_Negros">
-            <h2><a href="reportagens/rep1.html">Bancada negra ainda é minoria na Câmara Municipal de Curitiba</a></h2>
-            <h3>Na capital mais negra do Sul do Brasil, apenas um a cada dez vereadores eleitos é negro ou negra</h3>
-
-          </div>
-          <div class="reportagem" id="Votos_Negros">
-            <h2><a href="reportagens/rep2.html">Vereadores mais votados nos bairros sob maior risco climático de Curitiba não
-                apresentaram propostas ambientais na campanha de 2024</a></h2>
-            <h3>Relatório da prefeitura e do Ippuc aponta regiões sob risco de alagamentos, inundações, deslizamentos e
-              ondas de calor</h3>
-
-          </div>
-        </div>
-      </div>
-
-
-    </div>
-
-    <div class="rodape">
-      <h1 class="textoRodape">COMO VOTA CURITIBA</h1>
-      <p class="titulo_texto">
-        Site (sendo) construído por
-        <a href="https://www.giovanisella.com.br" target="_blank">Giovani Sella</a>
-      </p>
-    </div>
+    <div class="rodape" id="rodape"></div>
   </div>
 
   <!-- Scripts -->
   <script src="componentes/mapa-painel.js"></script>
   <script>injetarMapaPainel('mapa-painel');</script>
+  <script src="componentes/reportagens-lista.js"></script>
+  <script>injetarReportagens('reportagens-lista');</script>
+  <script src="componentes/rodape.js"></script>
+  <script>injetarRodape('rodape');</script>
   <script src="js/script.js"></script>
 
   <!-- Script para PWA -->

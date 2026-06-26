@@ -126,6 +126,7 @@ a {
 .Snap {
   height: 100vh;
   width: 100%;
+  overflow-x: hidden;
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
@@ -135,6 +136,7 @@ a {
 .Snapoff {
   height: 100vh;
   width: 100%;
+  overflow-x: hidden;
   overflow-y: scroll;
   scroll-snap-type: none;
   scroll-behavior: smooth;

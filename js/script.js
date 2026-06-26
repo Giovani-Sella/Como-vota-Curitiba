@@ -203,18 +203,22 @@ document.addEventListener('DOMContentLoaded', () => {
     itemTodosBairros.addEventListener('click', () => selecionarTodosBairros());
     listaContainer.appendChild(itemTodosBairros);
     
-    // Adiciona os bairros individuais
-    containerSVG.querySelectorAll('svg [id]').forEach(shape => {
-      if (!shape.id) return;
+    // Adiciona os bairros individuais em ordem alfabética
+    const ids = [...containerSVG.querySelectorAll('svg [id]')]
+      .map(s => s.id)
+      .filter(id => id)
+      .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+    ids.forEach(id => {
       const item = document.createElement('div');
       item.className = 'item';
-      item.textContent = shape.id;
-      
-      if (shape.id === bairroSelecionado) {
+      item.textContent = id;
+
+      if (id === bairroSelecionado) {
         item.classList.add('ativo');
       }
 
-      item.addEventListener('click', () => atualizarBairroSelecionado(shape.id));
+      item.addEventListener('click', () => atualizarBairroSelecionado(id));
       listaContainer.appendChild(item);
     });
   }
