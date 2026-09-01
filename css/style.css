@@ -25,7 +25,6 @@ body {
   flex-direction: column;
   align-items: center;
   overflow-y: hidden;
-  scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
   width: 100%;
   height: 100vh;
@@ -122,31 +121,19 @@ a {
    SEÇÕES PRINCIPAIS
 ============================= */
 
-/* Container que controla o scroll e o snap */
-.Snap {
-  height: 100vh;
-  width: 100%;
-  overflow-x: hidden;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
-  background-color: var(--cor-fundo);
-}
-
+.Snap,
 .Snapoff {
   height: 100vh;
   width: 100%;
   overflow-x: hidden;
   overflow-y: scroll;
-  scroll-snap-type: none;
   scroll-behavior: smooth;
+  background-color: var(--cor-fundo);
 }
 
-/* Seções que “grudam” */
 .inicial,
 .principal,
 .Reportagem_1 {
-  scroll-snap-align: start;
   height: 100vh;
   width: 100%;
   display: flex;
@@ -182,6 +169,7 @@ a {
   padding-bottom: var(--espacamento);
   box-sizing: border-box;
   height: 100%;
+  align-items: stretch;
 }
 
 .inicial {
@@ -193,7 +181,6 @@ a {
   width: 100%;
   text-align: center;
   gap: 0.5rem;
-  scroll-snap-align: start;
 
 }
 
@@ -203,7 +190,6 @@ a {
   justify-content: center;
   width: 100%;
   margin-top: 50px;
-  scroll-snap-align: start;
   padding-bottom: 200px;
 }
 
@@ -213,7 +199,6 @@ a {
   justify-content: center;
   width: 100%;
   margin-top: 50px;
-  scroll-snap-align: start;
   padding-bottom: 200px;
 }
 
@@ -224,7 +209,6 @@ a {
   justify-content: center;
   width: 100%;
   margin-top: 50px;
-  scroll-snap-align: start;
   padding-bottom: 200px;
 }
 
@@ -242,7 +226,6 @@ a {
   align-items: center;
   justify-content: center;
   justify-content: flex-start;
-  scroll-snap-align: end;
   gap: 0;
   -webkit-text-fill-color: var(--cor-secundaria);
 }
@@ -301,6 +284,13 @@ a {
   transition: fill 0.2s, stroke 0.2s, stroke-width 0.2s;
 }
 
+/* Bairro selecionado individualmente */
+#Svg_Container path.selected {
+  stroke: #FFD600;
+  stroke-width: 1.5;
+}
+
+
 #textoMouse {
   position: absolute;
   height: fit-content;
@@ -331,14 +321,13 @@ a {
 .lateralDireita {
   display: flex;
   flex-direction: column;
-  height: 100%;
   flex: 1;
+  min-height: 0;
   background-color: var(--cor-fundo-card);
   border-radius: var(--raio-borda);
   overflow-y: auto;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-  padding-left: var(--espacamento);
-  padding-right: var(--espacamento);
+  padding: var(--espacamento);
   gap: var(--espacamento);
 }
 
@@ -383,7 +372,7 @@ a {
   padding-bottom: var(--espacamento);
   gap: 8px;
   flex-shrink: 1;
-  flex: 1;
+  flex: 0.8;
   overflow-y: auto;
   min-height: 0;
 }

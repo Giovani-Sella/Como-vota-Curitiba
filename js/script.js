@@ -151,7 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     containerSVG.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
     const shape = containerSVG.querySelector(`#${CSS.escape(nome)}`);
-    if (shape) shape.classList.add('selected');
+    if (shape) {
+      shape.classList.add('selected');
+      shape.parentElement.appendChild(shape);
+    }
 
     atualizarPainelInformacoes(nome);
   }

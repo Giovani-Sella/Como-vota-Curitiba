@@ -11,7 +11,6 @@
 
     /* --- BASE --- */
     body {
-        scroll-snap-type: none;
         height: auto;
         overflow-x: hidden;
     }
@@ -27,7 +26,6 @@
     .paginaSobre,
     .paginaReportagem,
     .paginaBaseados {
-        scroll-snap-align: start;
         height: fit-content;
         min-height: 100vh;
         padding-top: 0;
@@ -114,6 +112,8 @@
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 2px;
+        overflow-y: visible;
+        flex: none;
     }
 
     .nomeDoBairro {
@@ -133,6 +133,11 @@
     .destaque {
         font-size: 0.8rem;
         grid-column: span 2;
+    }
+
+    .divinformacoes {
+        padding-top: 4px;
+        padding-bottom: 4px;
     }
 
     .divinformacoes h3 {
