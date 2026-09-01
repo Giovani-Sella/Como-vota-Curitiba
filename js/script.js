@@ -75,6 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
       // Inicializa interações
       addEventListenersToShapes();
       gerarLista();
+      listaContainer.addEventListener('change', () => {
+        if (listaContainer.value === '') {
+          selecionarTodosBairros();
+        } else {
+          atualizarBairroSelecionado(listaContainer.value);
+        }
+      });
       carregarCSV(caminhoDadosEleitorais, dadosEleitoraisBairros, 'Eleitorais');
       carregarCSV(caminhoDadosHab, dadosHabBairros, 'Hab');
       carregarCSV(caminhoDadosRenda, dadosRendaBairros, 'Renda');
@@ -140,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     todosBairros = false;
     bairroSelecionado = nome;
     nomeBairro.textContent = nome;
+    listaContainer.value = nome;
 
     containerSVG.querySelectorAll('.selected').forEach(s => s.classList.remove('selected'));
     const shape = containerSVG.querySelector(`#${CSS.escape(nome)}`);
@@ -190,37 +198,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function gerarLista() {
     listaContainer.innerHTML = '';
-    
-    // Adiciona "Todos os bairros" como primeiro item
-    const itemTodosBairros = document.createElement('div');
-    itemTodosBairros.className = 'item';
-    itemTodosBairros.textContent = 'Todos os bairros';
-    
-    if (todosBairros) {
-      itemTodosBairros.classList.add('ativo');
-    }
-    
-    itemTodosBairros.addEventListener('click', () => selecionarTodosBairros());
-    listaContainer.appendChild(itemTodosBairros);
-    
-    // Adiciona os bairros individuais em ordem alfabética
+
+    const optTodos = document.createElement('option');
+    optTodos.value = '';
+    optTodos.textContent = 'Todos os bairros';
+    listaContainer.appendChild(optTodos);
+
     const ids = [...containerSVG.querySelectorAll('svg [id]')]
       .map(s => s.id)
       .filter(id => id)
       .sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
     ids.forEach(id => {
-      const item = document.createElement('div');
-      item.className = 'item';
-      item.textContent = id;
-
-      if (id === bairroSelecionado) {
-        item.classList.add('ativo');
-      }
-
-      item.addEventListener('click', () => atualizarBairroSelecionado(id));
-      listaContainer.appendChild(item);
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = id;
+      listaContainer.appendChild(opt);
     });
+
+    listaContainer.value = bairroSelecionado;
   }
 
   // =============================

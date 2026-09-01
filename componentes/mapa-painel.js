@@ -17,8 +17,8 @@ function injetarMapaPainel(elementId) {
       <!-- PAINEL LATERAL -->
       <div class="lateralDireita">
         <div class="Escolha_bairros">
-          <h2>Selecione um Bairro</h2>
-          <div id="listaContainer"></div>
+          <label for="listaContainer">Selecione um Bairro</label>
+          <select id="listaContainer"></select>
         </div>
         <h2 id="Nome_Bairro" class="nomeDoBairro"></h2>
         <div class="containerOpcaoToggle">

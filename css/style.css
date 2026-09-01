@@ -345,18 +345,25 @@ a {
 .Escolha_bairros {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  gap: 6px;
 }
 
-/* Lista de bairros */
+.Escolha_bairros label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Dropdown de bairros */
 #listaContainer {
-  display: flex;
-  flex-direction: column;
   width: 100%;
-  overflow-y: auto;
   font-family: inherit;
-  flex: 1;
+  font-size: 0.95rem;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f4f4f4;
+  cursor: pointer;
+  appearance: auto;
 }
 
 .containerOpcaoToggle {
@@ -370,10 +377,11 @@ a {
 .informacoes {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 1fr;
   background-color: transparent;
   color: var(--cor-texto);
   padding-bottom: var(--espacamento);
-  gap: 1px;
+  gap: 8px;
   flex-shrink: 1;
   flex: 1;
   overflow-y: auto;
@@ -404,11 +412,11 @@ a {
 /* Bloco individual de informação */
 .divinformacoes {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  justify-content: center;
   padding: 8px 10px;
   background: #f7f7f7;
   border-radius: 6px;
-  height: fit-content;
   cursor: pointer;
   transition: background-color 0.2s, box-shadow 0.2s;
 }
