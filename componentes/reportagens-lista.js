@@ -18,6 +18,10 @@ function injetarReportagens(elementId) {
           <h2><a href="${_reportagensBase}rep2.html">Vereadores mais votados nos bairros sob maior risco climático de Curitiba não apresentaram propostas ambientais na campanha de 2024</a></h2>
           <h3>Relatório da prefeitura e do Ippuc aponta regiões sob risco de alagamentos, inundações, deslizamentos e ondas de calor</h3>
         </div>
+        <div class="reportagem">
+          <h2><a href="${_reportagensBase}rep3.html">Como Vota Curitiba é apresentado no Expocom Nacional 2026</a></h2>
+          <h3>Projeto concorre na categoria PT11 – Aplicativos de comunicação, na Sessão 10, do 49º Congresso Brasileiro de Ciências da Comunicação</h3>
+        </div>
       </div>
     </div>
   `;
