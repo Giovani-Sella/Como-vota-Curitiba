@@ -58,6 +58,18 @@ a {
   display: none;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* =============================
    AVISO DE CONSTRUÇÃO
 ============================= */
@@ -260,7 +272,8 @@ a {
 
 #followArea {
   display: flex;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   padding: var(--espacamento);
 }
 
@@ -271,14 +284,14 @@ a {
 }
 
 #Svg_Container svg {
-  display: flex;
-  transform: scale(1.6);
-
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* Estilo base dos bairros */
 #Svg_Container path {
-  fill: #cccccc;
+  fill: #aaaaaa;
   stroke: white;
   stroke-width: 0.2;
   transition: fill 0.2s, stroke 0.2s, stroke-width 0.2s;
@@ -332,27 +345,47 @@ a {
 }
 
 .Escolha_bairros {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex: none;
 }
 
-.Escolha_bairros label {
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-/* Dropdown de bairros */
+/* Dropdown de bairros — funciona como título do painel */
 #listaContainer {
   width: 100%;
-  font-family: inherit;
-  font-size: 0.95rem;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #f4f4f4;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--cor-texto);
+
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23242021' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  background-size: 14px 9px;
+
+  border: none;
+  border-bottom: 2px solid var(--cor-borda);
+  border-radius: 0;
+  padding: 4px 28px 8px 0;
+
   cursor: pointer;
-  appearance: auto;
+  transition: border-color 0.15s;
+}
+
+#listaContainer:hover {
+  border-bottom-color: #999;
+}
+
+#listaContainer:focus {
+  outline: none;
+  border-bottom-color: var(--cor-primaria);
+}
+
+/* "Curitiba – todos os bairros" em peso mais leve */
+#listaContainer.select--todos {
+  font-weight: 400;
+  color: #555;
 }
 
 .containerOpcaoToggle {
@@ -360,32 +393,21 @@ a {
   flex-direction: row;
   align-items: center;
   gap: var(--espacamento);
-
+  flex: none;
 }
 
 .informacoes {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-auto-rows: 1fr;
+  grid-auto-rows: minmax(min-content, 1fr);
   background-color: transparent;
   color: var(--cor-texto);
   padding-bottom: var(--espacamento);
   gap: 8px;
-  flex-shrink: 1;
-  flex: 0.8;
-  overflow-y: auto;
+  flex: 1 1 auto;
   min-height: 0;
 }
 
-.nomeDoBairro {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--cor-primaria);
-  border-bottom: 3px solid var(--cor-primaria);
-  display: inline-block;
-  padding-bottom: 4px;
-  margin-bottom: 12px;
-}
 
 /* Cada card */
 .card {
@@ -414,13 +436,21 @@ a {
   background-color: #f0f0f0;
 }
 
+/* Cards apenas informativos: sem cursor de mão nem efeito de hover */
+.divinformacoes--informativo {
+  cursor: default;
+}
+.divinformacoes--informativo:hover {
+  background-color: #f7f7f7;
+}
+
 .divinformacoes.ativo {
   background-color: var(--cor-primaria);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .divinformacoes h3 {
-  font-size: 1rem;
+  font-size: clamp(0.65rem, 1.4vh, 0.95rem);
   font-weight: 500;
   color: #555;
   margin: 0 0 0 4px;
@@ -432,10 +462,11 @@ a {
 
 .divinformacoes h2 {
   color: var(--cor-primaria);
-  font-size: 1rem;
+  font-size: clamp(0.65rem, 1.6vh, 1rem);
   font-weight: 600;
   margin: 0 0 0 5px;
   height: fit-content;
+  overflow-wrap: break-word;
 }
 
 .divinformacoes.ativo h2 {
@@ -529,6 +560,152 @@ a {
 .opcao_Partido.ativo {
   background: linear-gradient(135deg, #2ea35c, #e63939);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* =============================
+   LEGENDA DO MAPA (categórico)
+============================= */
+#legendaMapa {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+.legenda-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.legenda-cor {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.legenda-cor--hachura {
+  background: repeating-linear-gradient(
+    45deg,
+    #999 0px,
+    #999 1px,
+    #f0f0f0 1px,
+    #f0f0f0 4px
+  );
+}
+
+/* Toggle desativado nos cards categóricos */
+.toggle-desativado {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* =============================
+   LEGENDA DEGRADÊ
+============================= */
+.legenda-degrade {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.legenda-degrade-barra-wrap {
+  position: relative;
+  width: 100%;
+  height: 10px;
+}
+
+.legenda-degrade-barra {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+}
+
+.legenda-marcador {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 16px;
+  background: var(--cor-secundaria);
+  border-radius: 1px;
+  border: 1px solid white;
+  pointer-events: none;
+}
+
+.legenda-degrade-labels {
+  display: flex;
+  justify-content: space-between;
+}
+
+.legenda-degrade-label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+  max-width: 46%;
+}
+
+.legenda-degrade-label--right {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.legenda-degrade-nome {
+  font-size: 0.68rem;
+  color: #666;
+}
+
+/* =============================
+   SELETOR DE ELEIÇÃO
+============================= */
+.seletor-eleicao {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: none;
+}
+
+.seletor-linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+
+.btn-seletor {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: 1.5px solid var(--cor-borda);
+  background: #f7f7f7;
+  color: var(--cor-texto);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.btn-seletor:hover:not(:disabled) {
+  background: #ebebeb;
+  border-color: #aaa;
+}
+
+.btn-seletor[aria-pressed="true"] {
+  background: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  color: var(--cor-secundaria);
+}
+
+.btn-seletor:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
 }
 
 /* =============================

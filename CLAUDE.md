@@ -12,7 +12,9 @@ como pontos e ler dados no formato "uma linha por local de votação".
 - dados/Mapa_Curitiba.json — GeoJSON, 75 bairros. Propriedades: id (código IPPUC), nome, nome_exib,
   regional, populacao, pop_feminina, pop_branca/preta/parda/amarela/indigena, pop_negra,
   area_km2, densidade_hab_ha (Censo 2022), renda_media, renda_mediana (Censo 2010, R$ de 2010).
-- dados/eleicoes.json — lista de eleições: id, titulo, cargo, turno, locais (CSV), candidatos (CSV).
+- dados/eleicoes.json — lista de eleições. Campos: id, ano, cargo, rotulo_cargo, turno, locais (CSV),
+  candidatos (CSV), rotulo (texto exato do botão no seletor), padrao (true na eleição aberta por padrão).
+  "locais": null significa eleição listada mas ainda sem dados — botão aparece desativado.
 - dados/2022/*_por_local.csv — uma linha por local de votação: NR_ZONA, NR_LOCAL_VOTACAO,
   NM_LOCAL_VOTACAO, DS_LOCAL_VOTACAO_ENDERECO, NM_BAIRRO, NR_LATITUDE, NR_LONGITUDE,
   ID_BAIRRO (= id do GeoJSON), FL_TRANSITO (1 = local de voto em trânsito), QT_ELEITORES,
