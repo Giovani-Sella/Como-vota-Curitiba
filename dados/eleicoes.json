@@ -1,0 +1,12 @@
+[
+  { "id": "2022_pres_2t",  "titulo": "Presidente 2022 – 2º turno", "cargo": "PRESIDENTE",        "turno": "2",
+    "locais": "dados/2022/2022_resultado_pres_cwb_2t_por_local.csv", "candidatos": "dados/2022/2022_Dados_cand.csv" },
+  { "id": "2022_pres_1t",  "titulo": "Presidente 2022 – 1º turno", "cargo": "PRESIDENTE",        "turno": "1",
+    "locais": "dados/2022/2022_resultado_pres_cwb_1t_por_local.csv", "candidatos": "dados/2022/2022_Dados_cand.csv" },
+  { "id": "2022_sen",      "titulo": "Senador 2022",               "cargo": "SENADOR",           "turno": "1",
+    "locais": "dados/2022/2022_resultado_sen_cwb_por_local.csv",     "candidatos": "dados/2022/2022_Dados_cand.csv" },
+  { "id": "2022_depfed",   "titulo": "Deputado federal 2022",      "cargo": "DEPUTADO FEDERAL",  "turno": "1",
+    "locais": "dados/2022/2022_resultado_depfed_cwb_por_local.csv",  "candidatos": "dados/2022/2022_Dados_cand.csv" },
+  { "id": "2022_depes",    "titulo": "Deputado estadual 2022",     "cargo": "DEPUTADO ESTADUAL", "turno": "1",
+    "locais": "dados/2022/2022_resultado_depes_cwb_por_local.csv",   "candidatos": "dados/2022/2022_Dados_cand.csv" }
+]
