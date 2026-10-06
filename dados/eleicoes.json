@@ -25,5 +25,20 @@
     "locais": "dados/2024/2024_resultado_pref_cwb_2t_por_local.csv", "candidatos": "dados/2024/2024_Dados_cand.csv" },
   { "id": "2024_ver", "ano": 2024, "cargo": "VEREADOR", "rotulo_cargo": "Vereador", "turno": "1",
     "rotulo": "Vereador",
-    "locais": "dados/2024/2024_resultado_ver_cwb_por_local.csv", "candidatos": "dados/2024/2024_Dados_cand.csv" }
+    "locais": "dados/2024/2024_resultado_ver_cwb_por_local.csv", "candidatos": "dados/2024/2024_Dados_cand.csv" },
+  { "id": "2026_pres_1t", "ano": 2026, "cargo": "PRESIDENTE", "rotulo_cargo": "Presidente", "turno": "1",
+    "rotulo": "Presidente 1º turno", "padrao": true,
+    "locais": "dados/2026/2026_resultado_pres_cwb_1t_por_local.csv", "candidatos": "dados/2026/2026_Dados_cand.csv" },
+  { "id": "2026_gov_1t", "ano": 2026, "cargo": "GOVERNADOR", "rotulo_cargo": "Governador", "turno": "1",
+    "rotulo": "Governador 1º turno",
+    "locais": "dados/2026/2026_resultado_gov_cwb_1t_por_local.csv", "candidatos": "dados/2026/2026_Dados_cand.csv" },
+  { "id": "2026_sen", "ano": 2026, "cargo": "SENADOR", "rotulo_cargo": "Senador", "turno": "1",
+    "rotulo": "Senador",
+    "locais": "dados/2026/2026_resultado_sen_cwb_por_local.csv", "candidatos": "dados/2026/2026_Dados_cand.csv" },
+  { "id": "2026_depfed", "ano": 2026, "cargo": "DEPUTADO FEDERAL", "rotulo_cargo": "Dep. federal", "turno": "1",
+    "rotulo": "Dep. federal",
+    "locais": "dados/2026/2026_resultado_depfed_cwb_por_local.csv", "candidatos": "dados/2026/2026_Dados_cand.csv" },
+  { "id": "2026_depes", "ano": 2026, "cargo": "DEPUTADO ESTADUAL", "rotulo_cargo": "Dep. estadual", "turno": "1",
+    "rotulo": "Dep. estadual",
+    "locais": "dados/2026/2026_resultado_depes_cwb_por_local.csv", "candidatos": "dados/2026/2026_Dados_cand.csv" }
 ]
