@@ -38,3 +38,4 @@ como pontos e ler dados no formato "uma linha por local de votação".
 - Nunca ler, mover ou commitar nada em `dados/Tratamento de dados/`.
 - Antes de apagar qualquer arquivo, listar e pedir confirmação.
 - Ao terminar cada etapa, resumir o que mudou e o que devo testar.
+- PWA desativado durante a reforma; service-worker.js é um kill-switch e não deve ser registrado de novo até o fim.

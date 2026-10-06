@@ -1,32 +1,14 @@
-const CACHE_NAME = "como-vota-curitiba-v1";
-const urlsToCache = [
-  "/",
-  "/index.html",
-  "/css/style.css",
-  "/js/script.js"
-];
+// Kill-switch: apaga todos os caches, cancela o registro e recarrega as abas.
+// Necessário para remover o SW antigo em quem já visitou o site.
 
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-  );
-});
+self.addEventListener('install', () => self.skipWaiting());
 
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-  );
-});
-
-let deferredPrompt;
-
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-
-  console.log("PWA pode ser instalado");
-
-  // aqui você pode mostrar um botão personalizado depois
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+    await self.registration.unregister();
+    const clientList = await clients.matchAll({ type: 'window' });
+    clientList.forEach(client => client.navigate(client.url));
+  })());
 });

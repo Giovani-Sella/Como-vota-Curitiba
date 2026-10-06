@@ -13,8 +13,6 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/toggle.css" />
   <link rel="stylesheet" href="css/mobile.css" />
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
 </head>
 
 <body>
@@ -84,16 +82,6 @@
   <script>injetarRodape('rodape');</script>
   <script src="js/script.js"></script>
 
-  <!-- Script para PWA -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/service-worker.js")
-          .then(reg => console.log("SW registrado:", reg.scope))
-          .catch(err => console.error("Erro ao registrar SW:", err));
-      });
-    }
-  </script>
 
 </body>
 
