@@ -1,6 +1,6 @@
 // Estado global
-let bairroSelecionado       = null;  // id IPPUC (número) ou null
-let todosBairros            = true;
+// modo: 'bairros' → id = IPPUC number ou null; modo: 'locais' → id = "zona-numero" ou null
+let selecao                 = { modo: 'bairros', id: null, nm: null };
 let visualizacaoSelecionada = 'Numero_total_votos';
 let mostrarPorcentagem      = true;
 
@@ -116,24 +116,16 @@ function corParaNorm(norm) {
 }
 
 function formatarValorLegenda(valor, campo) {
-  if (campo === 'RendaPercapta') return formatarRenda(valor);
-  if (campo.startsWith('Porcentagem_'))
-    return new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 }).format(valor) + '%';
-  return new Intl.NumberFormat('pt-BR').format(Math.round(valor));
+  if (campo === 'RendaPercapta') return fmtDinheiro(valor);
+  if (campo.startsWith('Porcentagem_')) return fmtPorcentagem(valor);
+  return fmtInteiro(valor);
 }
 
 // Formata votos no partido/candidato respeitando o toggle de porcentagem
 function fmtVotosToggle(v, ref) {
   if (v === null || v === undefined) return '—';
-  if (mostrarPorcentagem && ref > 0)
-    return new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 }).format(v / ref * 100) + '%';
-  return new Intl.NumberFormat('pt-BR').format(v);
-}
-
-function formatarRenda(valor) {
-  const n = parseFloat(valor);
-  if (isNaN(n) || n <= 0) return '—';
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
+  if (mostrarPorcentagem && ref > 0) return fmtPorcentagem(v / ref * 100);
+  return fmtInteiro(v);
 }
 
 // Monta o rótulo da eleição a partir dos campos disponíveis no eleicoes.json.
@@ -176,14 +168,15 @@ function obterVisualizacaoCorreta(campo) {
 
 function atualizarToggle() {
   const categorico = camposCategoricos.includes(visualizacaoSelecionada);
-  document.querySelector('.containerOpcaoToggle')
+  document.querySelector('#permitirSaltos')
+    ?.closest('.containerOpcaoToggle')
     ?.classList.toggle('toggle-desativado', categorico);
 }
 
 function atualizarPainelInformacoes(idBairro) {
   const b    = dadosBairros.get(idBairro) || null;
   const geo  = propGeoJson(idBairro);
-  const pct  = (n, d) => d > 0 && n != null ? `${((n / d) * 100).toFixed(2)}%` : '—';
+  const pct  = (n, d) => d > 0 && n != null ? fmtPorcentagem((n / d) * 100) : '—';
 
   document.getElementById('Porcentagem_votos_pessoas_negras').classList.toggle('hidden', !mostrarPorcentagem);
   document.getElementById('Porcentagem_votos_mulheres').classList.toggle('hidden', !mostrarPorcentagem);
@@ -205,22 +198,22 @@ function atualizarPainelInformacoes(idBairro) {
   } else {
     const total      = b.qt_votos_total;
     const validosRef = b.votos_validos || 0;
-    document.getElementById('Numero_total_votos').textContent               = total ?? '—';
-    document.getElementById('Numero_votos_validos').textContent             = b.votos_validos ?? '—';
-    document.getElementById('Numero_votos_pessoas_negras').textContent      = b.votos_negros ?? '—';
+    document.getElementById('Numero_total_votos').textContent               = fmtInteiro(total);
+    document.getElementById('Numero_votos_validos').textContent             = fmtInteiro(b.votos_validos);
+    document.getElementById('Numero_votos_pessoas_negras').textContent      = fmtInteiro(b.votos_negros);
     document.getElementById('Porcentagem_votos_pessoas_negras').textContent = pct(b.votos_negros, total);
-    document.getElementById('Numero_votos_mulheres').textContent            = b.votos_mulheres ?? '—';
+    document.getElementById('Numero_votos_mulheres').textContent            = fmtInteiro(b.votos_mulheres);
     document.getElementById('Porcentagem_votos_mulheres').textContent       = pct(b.votos_mulheres, total);
-    document.getElementById('Numero_votos_nulos').textContent               = b.qt_votos_nulos ?? '—';
-    document.getElementById('Numero_votos_brancos').textContent             = b.qt_votos_brancos ?? '—';
+    document.getElementById('Numero_votos_nulos').textContent               = fmtInteiro(b.qt_votos_nulos);
+    document.getElementById('Numero_votos_brancos').textContent             = fmtInteiro(b.qt_votos_brancos);
     document.getElementById('PartidoMaisVotado').textContent                = b.partido_mais_votado || '—';
     document.getElementById('VotosNoPartido').textContent                   = fmtVotosToggle(b.votos_partido_mais_votado, validosRef);
     document.getElementById('VereadorMaisVotado').textContent               = b.candidato_mais_votado || '—';
     document.getElementById('VotosNoCandidato').textContent                 = fmtVotosToggle(b.votos_candidato_mais_votado, validosRef);
   }
 
-  document.getElementById('Numero_total_moradores').textContent = geo.populacao ?? '—';
-  document.getElementById('RendaPercapta').textContent          = formatarRenda(geo.renda_media);
+  document.getElementById('Numero_total_moradores').textContent = fmtInteiro(geo.populacao);
+  document.getElementById('RendaPercapta').textContent          = fmtDinheiro(geo.renda_media);
 }
 
 function atualizarPainelTodosBairros() {
@@ -237,30 +230,30 @@ function atualizarPainelTodosBairros() {
   }
   dadosGeoJson.features.forEach(f => { moradores += f.properties.populacao || 0; });
 
-  const pct = (n, d) => d > 0 ? `${((n / d) * 100).toFixed(2)}%` : '—';
+  const pct = (n, d) => d > 0 ? fmtPorcentagem((n / d) * 100) : '—';
 
   document.getElementById('Porcentagem_votos_pessoas_negras').classList.toggle('hidden', !mostrarPorcentagem);
   document.getElementById('Porcentagem_votos_mulheres').classList.toggle('hidden', !mostrarPorcentagem);
   document.getElementById('Numero_votos_pessoas_negras').classList.toggle('hidden', mostrarPorcentagem);
   document.getElementById('Numero_votos_mulheres').classList.toggle('hidden', mostrarPorcentagem);
 
-  document.getElementById('Numero_total_votos').textContent               = totaisSum || '—';
-  document.getElementById('Numero_votos_validos').textContent             = validosSum || '—';
-  document.getElementById('Numero_votos_pessoas_negras').textContent      = negrosSum || '—';
+  document.getElementById('Numero_total_votos').textContent               = fmtInteiro(totaisSum);
+  document.getElementById('Numero_votos_validos').textContent             = fmtInteiro(validosSum);
+  document.getElementById('Numero_votos_pessoas_negras').textContent      = fmtInteiro(negrosSum);
   document.getElementById('Porcentagem_votos_pessoas_negras').textContent = pct(negrosSum, totaisSum);
-  document.getElementById('Numero_votos_mulheres').textContent            = mulheresSum || '—';
+  document.getElementById('Numero_votos_mulheres').textContent            = fmtInteiro(mulheresSum);
   document.getElementById('Porcentagem_votos_mulheres').textContent       = pct(mulheresSum, totaisSum);
-  document.getElementById('Numero_votos_nulos').textContent               = nulosSum || '—';
-  document.getElementById('Numero_votos_brancos').textContent             = brancosSum || '—';
+  document.getElementById('Numero_votos_nulos').textContent               = fmtInteiro(nulosSum);
+  document.getElementById('Numero_votos_brancos').textContent             = fmtInteiro(brancosSum);
   document.getElementById('PartidoMaisVotado').textContent  = dadosCidade?.partido_mais_votado   || '—';
   document.getElementById('VotosNoPartido').textContent     = fmtVotosToggle(dadosCidade?.votos_partido_mais_votado   ?? null, validosSum);
   document.getElementById('VereadorMaisVotado').textContent = dadosCidade?.candidato_mais_votado || '—';
   document.getElementById('VotosNoCandidato').textContent   = fmtVotosToggle(dadosCidade?.votos_candidato_mais_votado ?? null, validosSum);
-  document.getElementById('Numero_total_moradores').textContent           = moradores || '—';
+  document.getElementById('Numero_total_moradores').textContent           = fmtInteiro(moradores);
   document.getElementById('RendaPercapta').textContent                    = '—';
 }
 
-function gerarLista() {
+function gerarListaBairros() {
   const lista = document.getElementById('listaContainer');
   lista.innerHTML = '';
 
@@ -279,7 +272,131 @@ function gerarLista() {
     lista.appendChild(opt);
   });
 
-  lista.value = bairroSelecionado ?? '';
+  lista.value = selecao.modo === 'bairros' ? (selecao.id ?? '') : '';
+}
+
+const _PREPOSICOES = new Set(['da', 'de', 'do', 'das', 'dos', 'e']);
+
+function tituloCase(str) {
+  if (!str) return '';
+  return str.toLowerCase().split(' ').map((w, i) =>
+    i > 0 && _PREPOSICOES.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)
+  ).join(' ');
+}
+
+function gerarListaLocais() {
+  const lista = document.getElementById('listaContainer');
+  lista.innerHTML = '';
+
+  const optTodos = document.createElement('option');
+  optTodos.value = '';
+  optTodos.textContent = 'Curitiba – todos os locais';
+  lista.appendChild(optTodos);
+
+  // Agrupa por ID_BAIRRO
+  const porBairro = new Map();
+  for (const row of dadosLocaisRaw) {
+    const idBairro = +row.ID_BAIRRO;
+    if (!porBairro.has(idBairro)) porBairro.set(idBairro, []);
+    porBairro.get(idBairro).push(row);
+  }
+
+  // Ordena bairros alfabeticamente
+  const bairrosOrdenados = [...porBairro.keys()].sort((a, b) => {
+    const na = propGeoJson(a).nome_exib || '';
+    const nb = propGeoJson(b).nome_exib || '';
+    return na.localeCompare(nb, 'pt-BR');
+  });
+
+  for (const idBairro of bairrosOrdenados) {
+    const geo = propGeoJson(idBairro);
+    const group = document.createElement('optgroup');
+    group.label = geo.nome_exib || String(idBairro);
+
+    const locaisOrdenados = [...porBairro.get(idBairro)]
+      .sort((a, b) => tituloCase(a.NM_LOCAL_VOTACAO).localeCompare(tituloCase(b.NM_LOCAL_VOTACAO), 'pt-BR'));
+
+    for (const row of locaisOrdenados) {
+      const opt = document.createElement('option');
+      opt.value = `${row.NR_ZONA}-${row.NR_LOCAL_VOTACAO}`;
+      let nome = tituloCase(row.NM_LOCAL_VOTACAO);
+      if (+row.FL_TRANSITO === 1) nome += ' (voto em trânsito)';
+      opt.textContent = nome;
+      group.appendChild(opt);
+    }
+    lista.appendChild(group);
+  }
+
+  lista.value = selecao.id ?? '';
+  lista.classList.toggle('select--todos', !selecao.id);
+}
+
+function atualizarPainelLocal(chave) {
+  const row = dadosLocaisRaw.find(r => `${r.NR_ZONA}-${r.NR_LOCAL_VOTACAO}` === chave);
+  if (!row) { atualizarPainelTodosBairros(); return; }
+
+  const qtTotal   = +row.QT_VOTOS_TOTAL   || 0;
+  const qtBrancos = +row.QT_VOTOS_BRANCOS || 0;
+  const qtNulos   = +row.QT_VOTOS_NULOS   || 0;
+
+  const _cand = {}, _leg = {};
+  for (const [col, val] of Object.entries(row)) {
+    if (col.startsWith('CAND_'))      _cand[col.slice(5)] = +val || 0;
+    else if (col.startsWith('LEG_')) _leg[col.slice(4)]  = +val || 0;
+  }
+
+  const votos_validos = dadosCandNums.reduce((s, nr) => s + (_cand[nr] || 0), 0)
+    + Object.values(_leg).reduce((s, v) => s + v, 0);
+
+  let votos_negros = 0, votos_mulheres = 0;
+  for (const nr of dadosCandNums) {
+    const c = dadosCandMap.get(nr);
+    if (!c) continue;
+    const v = _cand[nr] || 0;
+    if (c.NEGRO === '1')            votos_negros   += v;
+    if (c.DS_GENERO === 'FEMININO') votos_mulheres += v;
+  }
+
+  const b = { _cand, _leg, qt_votos_total: qtTotal, votos_validos };
+  _calcVencedores(b);
+
+  const idBairro = +row.ID_BAIRRO;
+  const geo = propGeoJson(idBairro);
+  const pct = (n, d) => d > 0 && n != null ? fmtPorcentagem((n / d) * 100) : '—';
+
+  document.getElementById('Porcentagem_votos_pessoas_negras').classList.toggle('hidden', !mostrarPorcentagem);
+  document.getElementById('Porcentagem_votos_mulheres').classList.toggle('hidden', !mostrarPorcentagem);
+  document.getElementById('Numero_votos_pessoas_negras').classList.toggle('hidden', mostrarPorcentagem);
+  document.getElementById('Numero_votos_mulheres').classList.toggle('hidden', mostrarPorcentagem);
+
+  document.getElementById('Numero_total_votos').textContent               = fmtInteiro(qtTotal);
+  document.getElementById('Numero_votos_validos').textContent             = fmtInteiro(votos_validos);
+  document.getElementById('Numero_votos_pessoas_negras').textContent      = fmtInteiro(votos_negros);
+  document.getElementById('Porcentagem_votos_pessoas_negras').textContent = pct(votos_negros, qtTotal);
+  document.getElementById('Numero_votos_mulheres').textContent            = fmtInteiro(votos_mulheres);
+  document.getElementById('Porcentagem_votos_mulheres').textContent       = pct(votos_mulheres, qtTotal);
+  document.getElementById('Numero_votos_nulos').textContent               = fmtInteiro(qtNulos);
+  document.getElementById('Numero_votos_brancos').textContent             = fmtInteiro(qtBrancos);
+  document.getElementById('PartidoMaisVotado').textContent                = b.partido_mais_votado || '—';
+  document.getElementById('VotosNoPartido').textContent                   = fmtVotosToggle(b.votos_partido_mais_votado, votos_validos);
+  document.getElementById('VereadorMaisVotado').textContent               = b.candidato_mais_votado || '—';
+  document.getElementById('VotosNoCandidato').textContent                 = fmtVotosToggle(b.votos_candidato_mais_votado, votos_validos);
+
+  document.getElementById('Numero_total_moradores').textContent = fmtInteiro(geo.populacao);
+  document.getElementById('RendaPercapta').textContent          = fmtDinheiro(geo.renda_media);
+
+  const nomeBairro = geo.nome_exib ? ` – ${geo.nome_exib}` : '';
+  const spanMoradores = document.getElementById('label-moradores-bairro');
+  const spanRenda     = document.getElementById('label-renda-bairro');
+  if (spanMoradores) spanMoradores.textContent = nomeBairro;
+  if (spanRenda)     spanRenda.textContent     = nomeBairro;
+}
+
+function _limparLabelsBairro() {
+  const spanMoradores = document.getElementById('label-moradores-bairro');
+  const spanRenda     = document.getElementById('label-renda-bairro');
+  if (spanMoradores) spanMoradores.textContent = '';
+  if (spanRenda)     spanRenda.textContent     = '';
 }
 
 // --- Seletor de eleição ---
@@ -347,8 +464,33 @@ async function trocarEleicao() {
 
   recolorirTodosBairros();
   atualizarTituloMapa(visualizacaoSelecionada);
-  if (todosBairros) atualizarPainelTodosBairros();
-  else if (bairroSelecionado !== null) atualizarPainelInformacoes(bairroSelecionado);
+  desenharLocais(dadosLocais);
+  mostrarLocais(document.getElementById('exibirLocais')?.checked ?? false);
+
+  if (selecao.modo === 'locais') {
+    if (selecao.id !== null) {
+      const [zona, numLocal] = selecao.id.split('-');
+      const match = dadosLocaisRaw.find(r =>
+        r.NR_ZONA === zona && r.NR_LOCAL_VOTACAO === numLocal && r.NM_LOCAL_VOTACAO === selecao.nm
+      );
+      if (!match) {
+        selecao = { modo: 'locais', id: null, nm: null };
+        destacarLocalSelecionado(-1);
+        selecionarBairro(null);
+      }
+    }
+    gerarListaLocais();
+    if (selecao.id === null) {
+      document.getElementById('listaContainer').value = '';
+      document.getElementById('listaContainer').classList.add('select--todos');
+      atualizarPainelTodosBairros();
+    } else {
+      selecionarLocal(selecao.id);
+    }
+  } else {
+    if (selecao.id === null) atualizarPainelTodosBairros();
+    else atualizarPainelInformacoes(selecao.id);
+  }
 
   carregandoEleicao = false;
   setBotoesDesabilitados(false);
@@ -487,13 +629,13 @@ function renderizarLegenda(itens) {
     const corStyle = item.cor === 'url(#hachura)'
       ? 'class="legenda-cor legenda-cor--hachura"'
       : `class="legenda-cor" style="background:${item.cor}"`;
-    return `<span class="legenda-item"><span ${corStyle}></span>${item.nome} (${item.count})</span>`;
+    return `<span class="legenda-item"><span ${corStyle}></span>${item.nome} (${fmtInteiro(item.count)})</span>`;
   }).join('');
 
   const outrosHtml = resto.length > 0
     ? (() => {
         const n = resto.reduce((s, i) => s + i.count, 0);
-        return `<span class="legenda-item"><span class="legenda-cor" style="background:#999"></span>Outros (${n})</span>`;
+        return `<span class="legenda-item"><span class="legenda-cor" style="background:#999"></span>Outros (${fmtInteiro(n)})</span>`;
       })()
     : '';
 
@@ -519,8 +661,8 @@ function renderizarLegendaDegrade(campo, tabela, info) {
 
   // Marcador do bairro selecionado (sempre no DOM, oculto quando sem seleção)
   let marcadorStyle = 'display:none';
-  if (!todosBairros && bairroSelecionado !== null) {
-    const row = tabela.find(r => r.id === bairroSelecionado);
+  if (selecao.modo === 'bairros' && selecao.id !== null) {
+    const row = tabela.find(r => r.id === selecao.id);
     if (row) marcadorStyle = `left:${row[campo] ?? 0}%`;
   }
 
@@ -563,12 +705,12 @@ function atualizarMarcadorLegenda() {
   const marcador = document.querySelector('#legendaMapa .legenda-marcador');
   if (!marcador) return; // modo categórico — sem legenda degradê
 
-  if (todosBairros || bairroSelecionado === null || !_ultimaTabelaInfo) {
+  if (selecao.modo !== 'bairros' || selecao.id === null || !_ultimaTabelaInfo) {
     marcador.style.display = 'none';
     return;
   }
 
-  const row = _ultimaTabelaInfo.tabela.find(r => r.id === bairroSelecionado);
+  const row = _ultimaTabelaInfo.tabela.find(r => r.id === selecao.id);
   if (!row) { marcador.style.display = 'none'; return; }
 
   marcador.style.left = `${row[visualizacaoSelecionada] ?? 0}%`;
@@ -646,8 +788,7 @@ function configurarClickCamposEleitorais() {
 // ---
 
 function atualizarBairroSelecionado(idBairro) {
-  todosBairros = false;
-  bairroSelecionado = idBairro;
+  selecao = { modo: 'bairros', id: idBairro, nm: null };
   const lista = document.getElementById('listaContainer');
   lista.value = idBairro;
   lista.classList.remove('select--todos');
@@ -657,8 +798,7 @@ function atualizarBairroSelecionado(idBairro) {
 }
 
 function selecionarTodosBairros() {
-  todosBairros = true;
-  bairroSelecionado = null;
+  selecao = { modo: 'bairros', id: null, nm: null };
   const lista = document.getElementById('listaContainer');
   lista.value = '';
   lista.classList.add('select--todos');
@@ -666,6 +806,67 @@ function selecionarTodosBairros() {
   atualizarPainelTodosBairros();
   atualizarTituloMapa(visualizacaoSelecionada);
   atualizarMarcadorLegenda();
+}
+
+function selecionarLocal(chave) {
+  const row = dadosLocaisRaw.find(r => `${r.NR_ZONA}-${r.NR_LOCAL_VOTACAO}` === chave);
+  if (!row) { selecionarTodosLocais(); return; }
+
+  const lat = parseFloat(row.NR_LATITUDE);
+  const lng = parseFloat(row.NR_LONGITUDE);
+  const dotIdx = dadosLocais.findIndex(p => p.lat === lat && p.lng === lng);
+
+  selecao = { modo: 'locais', id: chave, nm: row.NM_LOCAL_VOTACAO };
+  const lista = document.getElementById('listaContainer');
+  lista.value = chave;
+  lista.classList.remove('select--todos');
+  destacarLocalSelecionado(dotIdx >= 0 ? dotIdx : -1);
+  selecionarBairro(+row.ID_BAIRRO);
+  atualizarPainelLocal(chave);
+  atualizarMarcadorLegenda();
+}
+
+function selecionarTodosLocais() {
+  selecao = { modo: 'locais', id: null, nm: null };
+  const lista = document.getElementById('listaContainer');
+  lista.value = '';
+  lista.classList.add('select--todos');
+  destacarLocalSelecionado(-1);
+  selecionarBairro(null);
+  _limparLabelsBairro();
+  atualizarPainelTodosBairros();
+  atualizarMarcadorLegenda();
+}
+
+function configurarToggleLocais() {
+  const checkbox = document.getElementById('exibirLocais');
+  if (!checkbox) return;
+  mostrarLocais(checkbox.checked); // aplica estado inicial (começa desmarcado)
+  checkbox.addEventListener('change', e => {
+    const ligado = e.target.checked;
+    mostrarLocais(ligado);
+    if (ligado) {
+      // Entra no modo locais: dropdown mostra locais, "todos" selecionado
+      selecao = { modo: 'locais', id: null, nm: null };
+      destacarLocalSelecionado(-1);
+      selecionarBairro(null);
+      gerarListaLocais();
+      atualizarPainelTodosBairros();
+    } else {
+      // Sai do modo locais: seleciona o bairro do local (se havia) ou todos
+      let idBairro = null;
+      if (selecao.id !== null) {
+        const r = dadosLocaisRaw.find(row => `${row.NR_ZONA}-${row.NR_LOCAL_VOTACAO}` === selecao.id);
+        if (r) idBairro = +r.ID_BAIRRO;
+      }
+      destacarLocalSelecionado(-1);
+      _limparLabelsBairro();
+      selecao = { modo: 'bairros', id: idBairro, nm: null };
+      gerarListaBairros();
+      if (idBairro !== null) atualizarBairroSelecionado(idBairro);
+      else selecionarTodosBairros();
+    }
+  });
 }
 
 function configurarToggle() {
@@ -684,31 +885,96 @@ function configurarToggle() {
         : 'Numero_votos_mulheres';
     }
     atualizarDestaque();
-    if (todosBairros) atualizarPainelTodosBairros();
-    else if (bairroSelecionado !== null) atualizarPainelInformacoes(bairroSelecionado);
+    if (selecao.modo === 'locais') {
+      if (selecao.id === null) atualizarPainelTodosBairros();
+      else atualizarPainelLocal(selecao.id);
+    } else {
+      if (selecao.id === null) atualizarPainelTodosBairros();
+      else atualizarPainelInformacoes(selecao.id);
+    }
     recolorirTodosBairros();
   });
 }
 
 // Callbacks do mapa D3
 function onHover(props, event, isMove) {
-  const textoMouse   = document.getElementById('textoMouse');
-  const containerSVG = document.getElementById('Svg_Container');
+  const textoMouse = document.getElementById('textoMouse');
+  const followArea = document.getElementById('followArea');
   if (!props) {
     textoMouse.style.display = 'none';
+    setLocalHover(-1);
     return;
   }
-  textoMouse.textContent = props.nome_exib;
-  if (isMove) {
-    const rect = containerSVG.getBoundingClientRect();
-    textoMouse.style.left = `${event.clientX - rect.left + 220}px`;
-    textoMouse.style.top  = `${event.clientY - rect.top  + 200}px`;
+
+  let texto    = props.nome_exib;
+  let localIdx = -1;
+  const locaisAtivos = document.getElementById('exibirLocais')?.checked;
+  if (locaisAtivos && event) {
+    const achado = localProximoSVG(event.clientX, event.clientY);
+    if (achado) {
+      texto    = achado.ponto.nomes.join('\n') || props.nome_exib;
+      localIdx = achado.idx;
+    }
   }
+  setLocalHover(localIdx);
+
+  textoMouse.textContent   = texto;
   textoMouse.style.display = 'block';
+
+  if (isMove) {
+    const areaRect = followArea.getBoundingClientRect();
+    const ttRect   = textoMouse.getBoundingClientRect();
+    const OFFSET   = 10;
+    let left = event.clientX - areaRect.left + OFFSET;
+    let top  = event.clientY - areaRect.top  + OFFSET;
+    if (event.clientX + OFFSET + ttRect.width  > window.innerWidth)
+      left = event.clientX - areaRect.left - ttRect.width  - OFFSET;
+    if (event.clientY + OFFSET + ttRect.height > window.innerHeight)
+      top  = event.clientY - areaRect.top  - ttRect.height - OFFSET;
+    textoMouse.style.left = `${Math.max(0, left)}px`;
+    textoMouse.style.top  = `${Math.max(0, top)}px`;
+  }
 }
 
-function onClick(idBairro) {
+function onClick(idBairro, event) {
+  if (selecao.modo === 'locais') {
+    if (!event) return;
+    const achado = localProximoSVG(event.clientX, event.clientY);
+    if (!achado) return; // clique longe dos pontos → nada
+    const rawRows = achado.ponto.rawRows || [];
+    const escolhido = rawRows.find(r => +r.FL_TRANSITO === 0) || rawRows[0];
+    if (!escolhido) return;
+    selecionarLocal(`${escolhido.NR_ZONA}-${escolhido.NR_LOCAL_VOTACAO}`);
+    return;
+  }
+
   atualizarBairroSelecionado(idBairro);
+  // Celular (hover: none): mostra tooltip do local por 2 s junto ao toque
+  if (!event || !window.matchMedia('(hover: none)').matches) return;
+  const locaisAtivos = document.getElementById('exibirLocais')?.checked;
+  if (!locaisAtivos) return;
+  const achado = localProximoSVG(event.clientX, event.clientY);
+  if (!achado || !achado.ponto.nomes.length) return;
+  const textoMouse = document.getElementById('textoMouse');
+  const followArea = document.getElementById('followArea');
+  textoMouse.textContent = achado.ponto.nomes.join('\n');
+  textoMouse.classList.add('tooltip-touch');
+  textoMouse.style.display = 'block';
+  const areaRect = followArea.getBoundingClientRect();
+  const ttRect   = textoMouse.getBoundingClientRect();
+  const OFFSET   = 10;
+  let left = event.clientX - areaRect.left + OFFSET;
+  let top  = event.clientY - areaRect.top  + OFFSET;
+  if (event.clientX + OFFSET + ttRect.width  > window.innerWidth)
+    left = event.clientX - areaRect.left - ttRect.width  - OFFSET;
+  if (event.clientY + OFFSET + ttRect.height > window.innerHeight)
+    top  = event.clientY - areaRect.top  - ttRect.height - OFFSET;
+  textoMouse.style.left = `${Math.max(0, left)}px`;
+  textoMouse.style.top  = `${Math.max(0, top)}px`;
+  setTimeout(() => {
+    textoMouse.classList.remove('tooltip-touch');
+    textoMouse.style.display = 'none';
+  }, 2000);
 }
 
 // Ponto de entrada — chamado em index.html após a injeção dos componentes
@@ -725,17 +991,24 @@ async function init() {
     dadosGeoJson,
     { onHover, onClick }
   );
+  desenharLocais(dadosLocais);
 
-  gerarLista();
+  gerarListaBairros();
   renderizarSeletor();
   configurarSeletorEleicao();
   configurarClickCamposEleitorais();
   configurarToggle();
+  configurarToggleLocais();
 
   document.getElementById('listaContainer').addEventListener('change', e => {
     const val = e.target.value;
-    if (val === '') selecionarTodosBairros();
-    else atualizarBairroSelecionado(+val);
+    if (selecao.modo === 'locais') {
+      if (val === '') selecionarTodosLocais();
+      else selecionarLocal(val);
+    } else {
+      if (val === '') selecionarTodosBairros();
+      else atualizarBairroSelecionado(+val);
+    }
   });
 
   setTimeout(() => {

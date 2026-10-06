@@ -9,6 +9,59 @@ let dadosBairros       = new Map(); // id_ippuc (número) → objeto agregado
 let dadosEleicaoAtual  = null;
 let dadosCoresPartidos = {};
 let dadosCidade        = null;    // vencedores para toda Curitiba
+let dadosLocais        = [];      // [{ lat, lng, nomes, rawRows }] deduplicated por coordenada
+let dadosLocaisRaw    = [];      // linhas cruas do CSV (uma por local)
+let dadosCandMap      = new Map(); // NR_CANDIDATO → candidato
+let dadosCandNums     = [];      // NR_CANDIDATO strings da eleição carregada
+let dadosLegMap       = new Map(); // NR_PARTIDO → SG_PARTIDO
+
+// Calcula vencedores em b={ _cand, _leg }; escreve os resultados em b.
+// Usa as globais dadosCandNums, dadosCandMap, dadosLegMap.
+function _calcVencedores(b) {
+  let maxV = -1, maxNr = null;
+  for (const nr of dadosCandNums) {
+    const v = b._cand[nr] || 0;
+    if (v > maxV) { maxV = v; maxNr = nr; }
+  }
+  const tiedCands = maxV > 0 ? dadosCandNums.filter(nr => (b._cand[nr] || 0) === maxV) : [];
+  b.empate_candidato = tiedCands.length > 1;
+
+  if (!b.empate_candidato && maxNr && dadosCandMap.has(maxNr)) {
+    const c = dadosCandMap.get(maxNr);
+    b.candidato_mais_votado            = `${c.NM_URNA_CANDIDATO} (${c.SG_PARTIDO})`;
+    b.nm_candidato_mais_votado         = c.NM_URNA_CANDIDATO;
+    b.sg_partido_candidato_mais_votado = c.SG_PARTIDO;
+  } else if (b.empate_candidato) {
+    b.candidato_mais_votado            = 'Empate';
+    b.nm_candidato_mais_votado         = null;
+    b.sg_partido_candidato_mais_votado = null;
+  } else {
+    b.candidato_mais_votado            = '—';
+    b.nm_candidato_mais_votado         = null;
+    b.sg_partido_candidato_mais_votado = null;
+  }
+
+  const vpp = {};
+  for (const nr of dadosCandNums) {
+    const c = dadosCandMap.get(nr);
+    if (!c) continue;
+    vpp[c.SG_PARTIDO] = (vpp[c.SG_PARTIDO] || 0) + (b._cand[nr] || 0);
+  }
+  for (const [nrPartido, votos] of Object.entries(b._leg)) {
+    const sg = dadosLegMap.get(nrPartido);
+    if (sg) vpp[sg] = (vpp[sg] || 0) + votos;
+  }
+  let maxPV = -1, maxP = null;
+  for (const [p, v] of Object.entries(vpp)) {
+    if (v > maxPV) { maxPV = v; maxP = p; }
+  }
+  const tiedPartidos = maxPV > 0 ? Object.keys(vpp).filter(p => vpp[p] === maxPV) : [];
+  b.empate_partido      = tiedPartidos.length > 1;
+  b.partido_mais_votado = b.empate_partido ? 'Empate' : (maxP || '—');
+
+  b.votos_candidato_mais_votado = b.empate_candidato || maxV  <= 0 ? null : maxV;
+  b.votos_partido_mais_votado   = b.empate_partido   || maxPV <= 0 ? null : maxPV;
+}
 
 async function carregarTudo() {
   const [geo, eleicoes, coresPartidos] = await Promise.all([
@@ -44,55 +97,10 @@ async function carregarEleicao(eleicao) {
   const legCols  = Object.keys(row0).filter(c => c.startsWith('LEG_'));
   const candNums = candCols.map(c => c.slice(5)); // 'CAND_13' → '13'
 
-  // Calcula candidato e partido vencedores num objeto { _cand, _leg }.
-  // Fecha sobre candNums, candMap e legMap — chamada para cada bairro e para a cidade.
-  function _calcVencedores(b) {
-    // Candidato mais votado
-    let maxV = -1, maxNr = null;
-    for (const nr of candNums) {
-      const v = b._cand[nr] || 0;
-      if (v > maxV) { maxV = v; maxNr = nr; }
-    }
-    const tiedCands = maxV > 0 ? candNums.filter(nr => (b._cand[nr] || 0) === maxV) : [];
-    b.empate_candidato = tiedCands.length > 1;
-
-    if (!b.empate_candidato && maxNr && candMap.has(maxNr)) {
-      const c = candMap.get(maxNr);
-      b.candidato_mais_votado            = `${c.NM_URNA_CANDIDATO} (${c.SG_PARTIDO})`;
-      b.nm_candidato_mais_votado         = c.NM_URNA_CANDIDATO;
-      b.sg_partido_candidato_mais_votado = c.SG_PARTIDO;
-    } else if (b.empate_candidato) {
-      b.candidato_mais_votado            = 'Empate';
-      b.nm_candidato_mais_votado         = null;
-      b.sg_partido_candidato_mais_votado = null;
-    } else {
-      b.candidato_mais_votado            = '—';
-      b.nm_candidato_mais_votado         = null;
-      b.sg_partido_candidato_mais_votado = null;
-    }
-
-    // Partido mais votado (votos nominais por partido + votos de legenda)
-    const vpp = {};
-    for (const nr of candNums) {
-      const c = candMap.get(nr);
-      if (!c) continue;
-      vpp[c.SG_PARTIDO] = (vpp[c.SG_PARTIDO] || 0) + (b._cand[nr] || 0);
-    }
-    for (const [nrPartido, votos] of Object.entries(b._leg)) {
-      const sg = legMap.get(nrPartido);
-      if (sg) vpp[sg] = (vpp[sg] || 0) + votos;
-    }
-    let maxPV = -1, maxP = null;
-    for (const [p, v] of Object.entries(vpp)) {
-      if (v > maxPV) { maxPV = v; maxP = p; }
-    }
-    const tiedPartidos = maxPV > 0 ? Object.keys(vpp).filter(p => vpp[p] === maxPV) : [];
-    b.empate_partido      = tiedPartidos.length > 1;
-    b.partido_mais_votado = b.empate_partido ? 'Empate' : (maxP || '—');
-
-    b.votos_candidato_mais_votado = b.empate_candidato || maxV  <= 0 ? null : maxV;
-    b.votos_partido_mais_votado   = b.empate_partido   || maxPV <= 0 ? null : maxPV;
-  }
+  // Publica lookups para uso em app.js (atualizarPainelLocal)
+  dadosCandMap  = candMap;
+  dadosCandNums = candNums;
+  dadosLegMap   = legMap;
 
   dadosBairros = new Map();
 
@@ -159,6 +167,27 @@ async function carregarEleicao(eleicao) {
   }
   _calcVencedores(cidade);
   dadosCidade = cidade;
+
+  // Guarda linhas cruas para modo locais
+  dadosLocaisRaw = locais;
+
+  // Deduplica locais por coordenada; agrega nomes e linhas cruas por ponto
+  const _coordIdx = new Map();
+  dadosLocais = [];
+  for (const row of locais) {
+    const lat = parseFloat(row.NR_LATITUDE);
+    const lng = parseFloat(row.NR_LONGITUDE);
+    if (isNaN(lat) || isNaN(lng)) continue;
+    const key = `${lat},${lng}`;
+    if (!_coordIdx.has(key)) {
+      _coordIdx.set(key, dadosLocais.length);
+      dadosLocais.push({ lat, lng, nomes: [], rawRows: [] });
+    }
+    const ponto = dadosLocais[_coordIdx.get(key)];
+    const nm = (row.NM_LOCAL_VOTACAO || '').trim();
+    if (nm && !ponto.nomes.includes(nm)) ponto.nomes.push(nm);
+    ponto.rawRows.push(row);
+  }
 
   dadosEleicaoAtual = eleicao;
 }

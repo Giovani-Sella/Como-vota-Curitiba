@@ -1,3 +1,14 @@
+let _svgEl      = null;
+let _projection = null;
+let _viewBoxW   = null;
+let _viewBoxH   = null;
+let _gLocais    = null;
+let _pontos     = null;
+let _pontosSVG  = null;
+let _delaunay   = null;
+let _hoveredIdx      = -1;
+let _selectedLocalIdx = -1;
+
 function inicializarMapa(containerEl, geoJson, callbacks) {
   d3.select(containerEl).selectAll('*').remove();
 
@@ -47,7 +58,15 @@ function inicializarMapa(containerEl, geoJson, callbacks) {
     .on('mouseover', (ev, d) => callbacks.onHover(d.properties, ev, false))
     .on('mouseout',  ()       => callbacks.onHover(null, null, false))
     .on('mousemove', (ev, d) => callbacks.onHover(d.properties, ev, true))
-    .on('click',     (ev, d) => callbacks.onClick(d.properties.id));
+    .on('click',     (ev, d) => callbacks.onClick(d.properties.id, ev));
+
+  _svgEl      = svg.node();
+  _projection = projection;
+  _viewBoxW   = w;
+  _viewBoxH   = h;
+  _gLocais    = svg.append('g').attr('id', 'g-locais');
+  window.removeEventListener('resize', _atualizarRaio);
+  window.addEventListener('resize', _atualizarRaio);
 }
 
 function colorirBairro(idBairro, cor) {
@@ -78,6 +97,119 @@ function selecionarBairro(idBairro) {
   const el = document.querySelector(`#Svg_Container [data-id="${idBairro}"]`);
   if (el) {
     el.classList.add('selected');
-    el.parentElement.appendChild(el); // traz para frente (z-order)
+    el.parentElement.appendChild(el); // traz para frente (z-order dentro do grupo de bairros)
+  }
+}
+
+// ---- Locais de votação ----
+
+function _calcRaio() {
+  if (!_svgEl || !_viewBoxW || !_viewBoxH) return 3;
+  const rect  = _svgEl.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return 3;
+  // preserveAspectRatio:meet → scale = min das duas razões
+  const scale = Math.min(rect.width / _viewBoxW, rect.height / _viewBoxH);
+  return scale > 0 ? 3 / scale : 3;
+}
+
+function _atualizarRaio() {
+  if (!_gLocais) return;
+  const r = _calcRaio();
+  _gLocais.selectAll('circle').each(function(d, i) {
+    const c = d3.select(this);
+    if (i === _hoveredIdx) {
+      c.attr('r', r * 5 / 3).attr('stroke-width', r / 3);
+    } else if (i === _selectedLocalIdx) {
+      c.attr('r', r * 4 / 3).attr('stroke-width', r / 2);
+    } else {
+      c.attr('r', r).attr('stroke-width', null);
+    }
+  });
+}
+
+function desenharLocais(pontos) {
+  if (!_gLocais || !_projection) return;
+  _gLocais.selectAll('circle').remove();
+  _hoveredIdx       = -1;
+  _selectedLocalIdx = -1;
+  _pontos     = pontos && pontos.length ? pontos : null;
+  if (!_pontos) { _pontosSVG = null; _delaunay = null; return; }
+
+  _pontosSVG = _pontos.map(d => {
+    const p = _projection([d.lng, d.lat]);
+    return p ?? [-9999, -9999];
+  });
+  _delaunay = d3.Delaunay.from(_pontosSVG);
+
+  const r = _calcRaio();
+  _gLocais.selectAll('circle')
+    .data(_pontos)
+    .join('circle')
+    .attr('cx', (d, i) => _pontosSVG[i][0])
+    .attr('cy', (d, i) => _pontosSVG[i][1])
+    .attr('r', r)
+    .attr('fill', '#000')
+    .attr('fill-opacity', 0.8)
+    .attr('pointer-events', 'none');
+}
+
+function mostrarLocais(visivel) {
+  if (_gLocais) _gLocais.style('display', visivel ? null : 'none');
+}
+
+function localProximoSVG(clientX, clientY) {
+  if (!_delaunay || !_svgEl || !_pontos) return null;
+  const ctm = _svgEl.getScreenCTM();
+  if (!ctm) return null;
+  const pt = _svgEl.createSVGPoint();
+  pt.x = clientX; pt.y = clientY;
+  const sp = pt.matrixTransform(ctm.inverse());
+  const idx = _delaunay.find(sp.x, sp.y);
+  const [px, py] = _pontosSVG[idx];
+  const dx = sp.x - px, dy = sp.y - py;
+  const limiar = _calcRaio() / 3 * 10; // 10 px de tela em unidades SVG
+  return Math.sqrt(dx * dx + dy * dy) <= limiar ? { idx, ponto: _pontos[idx] } : null;
+}
+
+function setLocalHover(idx) {
+  if (!_gLocais) return;
+  const circles = _gLocais.selectAll('circle');
+  if (_hoveredIdx >= 0 && _hoveredIdx !== idx) {
+    const r = _calcRaio();
+    const prev = circles.filter((d, i) => i === _hoveredIdx);
+    if (_hoveredIdx === _selectedLocalIdx) {
+      prev.attr('r', r * 4 / 3).attr('stroke', '#fff').attr('stroke-width', r / 2).attr('fill', '#2563eb');
+    } else {
+      prev.attr('r', r).attr('stroke', null).attr('stroke-width', null);
+    }
+  }
+  _hoveredIdx = idx;
+  if (idx >= 0) {
+    circles.filter((d, i) => i === idx)
+      .attr('r', _calcRaio() * 5 / 3)        // ~5 px em tela
+      .attr('stroke', '#fff')
+      .attr('stroke-width', _calcRaio() / 3); // ~1 px
+  }
+}
+
+function destacarLocalSelecionado(idx) {
+  if (!_gLocais) return;
+  const circles = _gLocais.selectAll('circle');
+  const r = _calcRaio();
+  // Reset previously selected
+  if (_selectedLocalIdx >= 0 && _selectedLocalIdx !== idx) {
+    circles.filter((d, i) => i === _selectedLocalIdx)
+      .attr('r', r)
+      .attr('fill', '#000')
+      .attr('stroke', null)
+      .attr('stroke-width', null);
+  }
+  _selectedLocalIdx = idx;
+  if (idx >= 0) {
+    circles.filter((d, i) => i === idx)
+      .attr('r', r * 4 / 3)
+      .attr('fill', '#2563eb')
+      .attr('stroke', '#fff')
+      .attr('stroke-width', r / 2);
   }
 }

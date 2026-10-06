@@ -25,14 +25,25 @@ function injetarMapaPainel(elementId) {
           <label class="visually-hidden" for="listaContainer">Bairro</label>
           <select id="listaContainer" class="select--todos"></select>
         </div>
-        <div class="containerOpcaoToggle">
-          <h3>Usar dados relativos a população </h3>
-          <label class="toggle-switch">
-            <input type="checkbox" id="permitirSaltos">
-            <div class="toggle-switch-background">
-              <div class="toggle-switch-handle"></div>
-            </div>
-          </label>
+        <div class="containerToggleGrupo">
+          <div class="containerOpcaoToggle">
+            <h3>Mostrar locais de votação</h3>
+            <label class="toggle-switch">
+              <input type="checkbox" id="exibirLocais">
+              <div class="toggle-switch-background">
+                <div class="toggle-switch-handle"></div>
+              </div>
+            </label>
+          </div>
+          <div class="containerOpcaoToggle">
+            <h3>Usar dados relativos a população </h3>
+            <label class="toggle-switch">
+              <input type="checkbox" id="permitirSaltos">
+              <div class="toggle-switch-background">
+                <div class="toggle-switch-handle"></div>
+              </div>
+            </label>
+          </div>
         </div>
         <div class="informacoes">
 
@@ -93,12 +104,12 @@ function injetarMapaPainel(elementId) {
           </div>
 
           <div class="divinformacoes" data-visualization="Numero_total_moradores">
-            <h3>Total de moradores <small>(Censo 2022)</small></h3>
+            <h3>Total de moradores<span id="label-moradores-bairro"></span> <small>(Censo 2022)</small></h3>
             <h2 id="Numero_total_moradores">—</h2>
           </div>
 
           <div class="divinformacoes" data-visualization="RendaPercapta">
-            <h3>Renda per capita <small>(Censo 2010)</small></h3>
+            <h3>Renda per capita<span id="label-renda-bairro"></span> <small>(Censo 2010)</small></h3>
             <h2 id="RendaPercapta">—</h2>
           </div>
 

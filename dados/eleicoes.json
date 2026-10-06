@@ -7,7 +7,7 @@
     "locais": "dados/2022/2022_resultado_pres_cwb_2t_por_local.csv", "candidatos": "dados/2022/2022_Dados_cand.csv" },
   { "id": "2022_gov", "ano": 2022, "cargo": "GOVERNADOR", "rotulo_cargo": "Governador", "turno": "1",
     "rotulo": "Governador",
-    "locais": null, "candidatos": "dados/2022/2022_Dados_cand.csv" },
+    "locais": "dados/2022/2022_resultado_gov_cwb_por_local.csv", "candidatos": "dados/2022/2022_Dados_cand.csv" },
   { "id": "2022_sen", "ano": 2022, "cargo": "SENADOR", "rotulo_cargo": "Senador", "turno": "1",
     "rotulo": "Senador",
     "locais": "dados/2022/2022_resultado_sen_cwb_por_local.csv", "candidatos": "dados/2022/2022_Dados_cand.csv" },
@@ -16,5 +16,14 @@
     "locais": "dados/2022/2022_resultado_depfed_cwb_por_local.csv", "candidatos": "dados/2022/2022_Dados_cand.csv" },
   { "id": "2022_depes", "ano": 2022, "cargo": "DEPUTADO ESTADUAL", "rotulo_cargo": "Dep. estadual", "turno": "1",
     "rotulo": "Dep. estadual",
-    "locais": "dados/2022/2022_resultado_depes_cwb_por_local.csv", "candidatos": "dados/2022/2022_Dados_cand.csv" }
+    "locais": "dados/2022/2022_resultado_depes_cwb_por_local.csv", "candidatos": "dados/2022/2022_Dados_cand.csv" },
+  { "id": "2024_pref_1t", "ano": 2024, "cargo": "PREFEITO", "rotulo_cargo": "Prefeito", "turno": "1",
+    "rotulo": "Prefeito 1º turno",
+    "locais": "dados/2024/2024_resultado_pref_cwb_1t_por_local.csv", "candidatos": "dados/2024/2024_Dados_cand.csv" },
+  { "id": "2024_pref_2t", "ano": 2024, "cargo": "PREFEITO", "rotulo_cargo": "Prefeito", "turno": "2",
+    "rotulo": "Prefeito 2º turno",
+    "locais": "dados/2024/2024_resultado_pref_cwb_2t_por_local.csv", "candidatos": "dados/2024/2024_Dados_cand.csv" },
+  { "id": "2024_ver", "ano": 2024, "cargo": "VEREADOR", "rotulo_cargo": "Vereador", "turno": "1",
+    "rotulo": "Vereador",
+    "locais": "dados/2024/2024_resultado_ver_cwb_por_local.csv", "candidatos": "dados/2024/2024_Dados_cand.csv" }
 ]
