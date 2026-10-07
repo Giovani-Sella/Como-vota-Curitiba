@@ -807,7 +807,7 @@ function renderizarLegendaDegrade({ modo, campo, minVal, maxVal, nomeMin, nomeMa
     let marcadorStyle = 'display:none';
     if (tabela && selecao.modo === 'bairros' && selecao.id !== null) {
       const row = tabela.find(r => r.id === selecao.id);
-      if (row) marcadorStyle = `left:${row[campo] ?? 0}%`;
+      if (row) marcadorStyle = `top:${100 - (row[campo] ?? 0)}%`;
     }
     marcadorHtml = `<div class="legenda-marcador" style="${marcadorStyle}"></div>`;
   }
@@ -826,18 +826,20 @@ function renderizarLegendaDegrade({ modo, campo, minVal, maxVal, nomeMin, nomeMa
   el.innerHTML = `
     ${tituloHtml}
     <div class="legenda-degrade">
-      <div class="legenda-degrade-barra-wrap">
-        <div class="legenda-degrade-barra" style="background:linear-gradient(to right,${paradas})"></div>
-        ${marcadorHtml}
-      </div>
-      <div class="legenda-degrade-labels">
-        <div class="legenda-degrade-label">
-          <span>${formatarValorLegenda(minVal, campo)}</span>
-          <span class="legenda-degrade-nome">${nomeMin}</span>
+      <div class="legenda-degrade-corpo">
+        <div class="legenda-degrade-barra-wrap">
+          <div class="legenda-degrade-barra" style="background:linear-gradient(to top,${paradas})"></div>
+          ${marcadorHtml}
         </div>
-        <div class="legenda-degrade-label legenda-degrade-label--right">
-          <span>${formatarValorLegenda(maxVal, campo)}</span>
-          <span class="legenda-degrade-nome">${nomeMax}</span>
+        <div class="legenda-degrade-labels">
+          <div class="legenda-degrade-label">
+            <span>${formatarValorLegenda(maxVal, campo)}</span>
+            <span class="legenda-degrade-nome">${nomeMax}</span>
+          </div>
+          <div class="legenda-degrade-label">
+            <span>${formatarValorLegenda(minVal, campo)}</span>
+            <span class="legenda-degrade-nome">${nomeMin}</span>
+          </div>
         </div>
       </div>
       ${semDadoHtml}
@@ -856,7 +858,7 @@ function atualizarMarcadorLegenda() {
   const row = _ultimaTabelaInfo.tabela.find(r => r.id === selecao.id);
   if (!row) { marcador.style.display = 'none'; return; }
 
-  marcador.style.left = `${row[visualizacaoSelecionada] ?? 0}%`;
+  marcador.style.top = `${100 - (row[visualizacaoSelecionada] ?? 0)}%`;
   marcador.style.removeProperty('display');
 }
 

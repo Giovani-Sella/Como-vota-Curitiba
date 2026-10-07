@@ -58,7 +58,7 @@ function inicializarMapa(containerEl, geoJson, callbacks) {
     .attr('pointer-events', 'all')
     .on('click', () => callbacks.onBackgroundClick?.());
 
-  svg.append('g')
+  svg.append('g').attr('id', 'g-bairros')
     .selectAll('path')
     .data(geoJson.features)
     .join('path')
@@ -234,3 +234,4 @@ function colorirLocais(mapaCores) {
     d3.select(this).attr('fill', mapaCores.get(i) ?? '#000000');
   });
 }
+
