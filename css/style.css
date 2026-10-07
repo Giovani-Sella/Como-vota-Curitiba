@@ -395,6 +395,7 @@ a {
   gap: 8px;
   flex: 1 1 auto;
   min-height: 0;
+  overflow-y: auto;
 }
 
 
@@ -630,5 +631,38 @@ a {
 .btn-seletor:disabled {
   opacity: 0.38;
   cursor: not-allowed;
+}
+
+/* =============================
+   VIEWPORT BAIXA (zoom 150 % ou tela curta)
+   Aplica-se quando a altura CSS < 700 px.
+   Meta: lateral direita cabe sem rolagem; se não couber,
+   só .informacoes rola — os controles fixos ficam visíveis.
+============================= */
+@media (max-height: 700px) {
+  :root {
+    --espacamento: 10px;
+  }
+
+  /* Botões do seletor de eleição */
+  .btn-seletor {
+    font-size: 0.78rem;
+    padding: 3px 10px;
+  }
+
+  /* Grade de cards */
+  .informacoes {
+    gap: 4px;
+  }
+
+  /* Cada card */
+  .divinformacoes {
+    padding: 4px 8px;
+  }
+
+  /* Texto de rodapé da grade */
+  .destaque {
+    font-size: 0.85em;
+  }
 }
 

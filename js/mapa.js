@@ -8,6 +8,7 @@ let _pontosSVG  = null;
 let _delaunay   = null;
 let _hoveredIdx      = -1;
 let _selectedLocalIdx = -1;
+let _coresLocais      = null; // último mapa de cores passado a colorirLocais
 
 function inicializarMapa(containerEl, geoJson, callbacks) {
   d3.select(containerEl).selectAll('*').remove();
@@ -49,6 +50,14 @@ function inicializarMapa(containerEl, geoJson, callbacks) {
   const projection = d3.geoMercator().fitSize([w, h], geoJson);
   const pathGen = d3.geoPath().projection(projection);
 
+  // Fundo clicável para desselecionar — deve vir antes dos paths (z-order SVG)
+  svg.append('rect')
+    .attr('width', w)
+    .attr('height', h)
+    .attr('fill', 'none')
+    .attr('pointer-events', 'all')
+    .on('click', () => callbacks.onBackgroundClick?.());
+
   svg.append('g')
     .selectAll('path')
     .data(geoJson.features)
@@ -82,11 +91,11 @@ function colorirTodos(tabelaNormalizada, campo) {
 }
 
 // Colore todos os paths do SVG a partir de um Map<idBairro, cor>.
-// Paths sem entrada no map recebem a cor padrão "sem dado".
-function colorirTodosCategorico(mapaCores) {
+// Paths sem entrada no map recebem corDefault (bairros sem dado ou modo neutro).
+function colorirTodosCategorico(mapaCores, corDefault = '#aaaaaa') {
   document.querySelectorAll('#Svg_Container [data-id]').forEach(el => {
     const id = +el.getAttribute('data-id');
-    el.style.fill = mapaCores.get(id) || '#aaaaaa';
+    el.style.fill = mapaCores.get(id) || corDefault;
   });
 }
 
@@ -133,6 +142,7 @@ function desenharLocais(pontos) {
   _hoveredIdx       = -1;
   _selectedLocalIdx = -1;
   _pontos     = pontos && pontos.length ? pontos : null;
+  _coresLocais = null;
   if (!_pontos) { _pontosSVG = null; _delaunay = null; return; }
 
   _pontosSVG = _pontos.map(d => {
@@ -199,9 +209,10 @@ function destacarLocalSelecionado(idx) {
   const circles = _gLocais.selectAll('circle');
   const r = _calcRaio();
   if (_selectedLocalIdx >= 0 && _selectedLocalIdx !== idx) {
+    const corOriginal = _coresLocais?.get(_selectedLocalIdx) ?? '#000000';
     circles.filter((d, i) => i === _selectedLocalIdx)
       .attr('r', r)
-      .attr('fill', '#000')
+      .attr('fill', corOriginal)
       .attr('stroke', 'rgba(255,255,255,0.8)')
       .attr('stroke-width', 0.75);
   }
@@ -216,6 +227,7 @@ function destacarLocalSelecionado(idx) {
 }
 
 function colorirLocais(mapaCores) {
+  _coresLocais = mapaCores;
   if (!_gLocais) return;
   _gLocais.selectAll('circle').each(function(d, i) {
     if (i === _selectedLocalIdx) return; // preserva seleção azul
