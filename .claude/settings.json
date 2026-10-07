@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./dados/Tratamento de dados/**)",
+      "Read(./node_modules/**)"
+    ]
+  }
+}
