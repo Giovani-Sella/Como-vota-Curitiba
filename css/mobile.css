@@ -22,9 +22,7 @@
     /* --- SEÇÕES PRINCIPAIS --- */
     .inicial,
     .principal,
-    .Reportagem_1,
     .paginaSobre,
-    .paginaReportagem,
     .paginaBaseados {
         height: fit-content;
         min-height: 100vh;
@@ -142,7 +140,11 @@
     /* --- LEGENDA DO MAPA --- */
     #legendaMapa {
         font-size: 0.68rem;
-        gap: 3px 8px;
+        gap: 3px;
+    }
+
+    .legenda-degrade-barra-wrap {
+        height: clamp(60px, 12vh, 120px);
     }
 
     .legenda-cor {

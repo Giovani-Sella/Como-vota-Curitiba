@@ -12,6 +12,9 @@ let carregandoEleicao = false;
 // Paleta de fallback para partidos sem cor definida (persiste na sessão)
 const _paletaFallback = new Map();
 
+// Cache da última corPorCand calculada — compartilhada com atualizarCoresLocais
+let _ultimaCorPorCand = new Map();
+
 // Cache da última tabela normalizada — atualiza o marcador da legenda sem recolorir o mapa
 let _ultimaTabelaInfo = null;
 
@@ -31,19 +34,27 @@ const camposVisualizaveis = [
 // Campos que usam coloração categórica (desativam o toggle)
 const camposCategoricos = ['PartidoMaisVotado', 'VereadorMaisVotado'];
 
+// Campos eleitorais que geram legenda degradê (exclui socioeconômicos)
+const camposDegrade = camposVisualizaveis.filter(c =>
+  !['Numero_total_moradores', 'RendaPercapta'].includes(c)
+);
+
+// Cinza de preenchimento dos bairros quando os pontos estão em foco (modo locais)
+const COR_BAIRRO_NEUTRO = '#d0d0d0';
+
 const titulosPorVisualizacao = {
-  Numero_total_votos:               t => `Total de votos — ${t}`,
-  Numero_votos_validos:             t => `Votos válidos — ${t}`,
-  Numero_votos_pessoas_negras:      t => `Votos em pessoas negras — ${t}`,
-  Porcentagem_votos_pessoas_negras: t => `% de votos em pessoas negras — ${t}`,
-  Numero_votos_mulheres:            t => `Votos em mulheres — ${t}`,
-  Porcentagem_votos_mulheres:       t => `% de votos em mulheres — ${t}`,
-  Numero_votos_nulos:               t => `Votos nulos — ${t}`,
-  Numero_votos_brancos:             t => `Votos brancos — ${t}`,
-  Numero_total_moradores:           () => 'Moradores por bairro de Curitiba (Censo 2022)',
-  RendaPercapta:                    () => 'Renda per capita por bairro de Curitiba (Censo 2010)',
-  PartidoMaisVotado:                () => 'Partido mais votado por bairro',
-  VereadorMaisVotado:               () => 'Candidato mais votado por bairro',
+  Numero_total_votos:               (t, u) => `Votos totais ${u} — ${t}`,
+  Numero_votos_validos:             (t, u) => `Votos válidos ${u} — ${t}`,
+  Numero_votos_pessoas_negras:      (t, u) => `Votos em candidatos negros ${u} — ${t}`,
+  Porcentagem_votos_pessoas_negras: (t, u) => `% dos votos em candidatos negros ${u} — ${t}`,
+  Numero_votos_mulheres:            (t, u) => `Votos em candidatas mulheres ${u} — ${t}`,
+  Porcentagem_votos_mulheres:       (t, u) => `% dos votos em candidatas mulheres ${u} — ${t}`,
+  Numero_votos_nulos:               (t, u) => `Votos nulos ${u} — ${t}`,
+  Numero_votos_brancos:             (t, u) => `Votos em branco ${u} — ${t}`,
+  Numero_total_moradores:           (t, u) => `População residente ${u} — Curitiba (Censo 2022)`,
+  RendaPercapta:                    (t, u) => `Renda média por habitante ${u} — Curitiba (R$ de 2010, Censo 2010)`,
+  PartidoMaisVotado:                (t, u) => `Partido mais votado ${u} — ${t}`,
+  VereadorMaisVotado:               (t, u) => `Candidato mais votado ${u} — ${t}`,
 };
 
 // Retorna properties do GeoJSON para um id IPPUC
@@ -115,6 +126,11 @@ function corParaNorm(norm) {
   return `rgb(${r},${g},${b})`;
 }
 
+// Paleta única do degradê — usada em bairros, pontos de locais e legenda
+function getColor(norm) {
+  return corParaNorm(norm);
+}
+
 function formatarValorLegenda(valor, campo) {
   if (campo === 'RendaPercapta') return fmtDinheiro(valor);
   if (campo.startsWith('Porcentagem_')) return fmtPorcentagem(valor);
@@ -144,8 +160,13 @@ function atualizarTituloMapa(campo) {
   const el = document.querySelector('#tituloMapa h2');
   if (!el) return;
   const titulo = tituloEleicao(dadosEleicaoAtual);
+  // Socioeconômicos colorem bairros mesmo com locais ligados — unidade é sempre bairro
+  const camposSocio = ['Numero_total_moradores', 'RendaPercapta'];
+  const unidade = (!camposSocio.includes(campo) && selecao.modo === 'locais')
+    ? 'por local de votação'
+    : 'por bairro';
   const fn = titulosPorVisualizacao[campo];
-  el.textContent = fn ? fn(titulo) : 'Mapa de Curitiba';
+  el.textContent = fn ? fn(titulo, unidade) : 'Mapa de Curitiba';
 }
 
 function atualizarDestaque() {
@@ -184,7 +205,9 @@ function atualizarPainelInformacoes(idBairro) {
   document.getElementById('Numero_votos_mulheres').classList.toggle('hidden', mostrarPorcentagem);
 
   if (!b) {
-    const semVoto = 'Sem local de votação';
+    const semVoto = dadosEleicaoAtual?.ano
+      ? `Sem local de votação em ${dadosEleicaoAtual.ano}`
+      : 'Sem local de votação';
     ['Numero_total_votos', 'Numero_votos_validos',
      'Numero_votos_pessoas_negras', 'Porcentagem_votos_pessoas_negras',
      'Numero_votos_mulheres', 'Porcentagem_votos_mulheres',
@@ -466,6 +489,7 @@ async function trocarEleicao() {
   atualizarTituloMapa(visualizacaoSelecionada);
   desenharLocais(dadosLocais);
   mostrarLocais(document.getElementById('exibirLocais')?.checked ?? false);
+  atualizarCoresLocais(); // re-aplica após desenharLocais resetar os fills
 
   if (selecao.modo === 'locais') {
     if (selecao.id !== null) {
@@ -647,54 +671,182 @@ function limparLegenda() {
   if (el) el.innerHTML = '';
 }
 
-function renderizarLegendaDegrade(campo, tabela, info) {
+// --- Legenda e cores dos locais de votação ---
+
+// Calcula stats de um local a partir de uma linha crua do CSV.
+function _calcularStatsLocal(row) {
+  const qtTotal   = +row.QT_VOTOS_TOTAL   || 0;
+  const qtBrancos = +row.QT_VOTOS_BRANCOS || 0;
+  const qtNulos   = +row.QT_VOTOS_NULOS   || 0;
+
+  const _cand = {};
+  for (const nr of dadosCandNums) _cand[nr] = +row[`CAND_${nr}`] || 0;
+
+  const _leg = {};
+  for (const nrPartido of dadosLegMap.keys()) _leg[nrPartido] = +row[`LEG_${nrPartido}`] || 0;
+
+  const votos_validos = dadosCandNums.reduce((s, nr) => s + _cand[nr], 0)
+    + Object.values(_leg).reduce((s, v) => s + v, 0);
+
+  let votos_negros = 0, votos_mulheres = 0;
+  for (const nr of dadosCandNums) {
+    const c = dadosCandMap.get(nr);
+    if (!c) continue;
+    const v = _cand[nr];
+    if (c.NEGRO === '1')            votos_negros   += v;
+    if (c.DS_GENERO === 'FEMININO') votos_mulheres += v;
+  }
+
+  const b = { _cand, _leg, qt_votos_total: qtTotal, votos_validos };
+  _calcVencedores(b);
+
+  return { qt_votos_total: qtTotal, qt_votos_brancos: qtBrancos, qt_votos_nulos: qtNulos,
+           votos_validos, votos_negros, votos_mulheres, ...b };
+}
+
+// Retorna o valor numérico bruto do campo ativo para um objeto stats.
+function _getValorLocal(stats) {
+  const total = stats.qt_votos_total || 0;
+  switch (visualizacaoSelecionada) {
+    case 'Numero_total_votos':               return total;
+    case 'Numero_votos_validos':             return stats.votos_validos;
+    case 'Numero_votos_pessoas_negras':      return stats.votos_negros;
+    case 'Porcentagem_votos_pessoas_negras': return total > 0 ? (stats.votos_negros   / total) * 100 : 0;
+    case 'Numero_votos_mulheres':            return stats.votos_mulheres;
+    case 'Porcentagem_votos_mulheres':       return total > 0 ? (stats.votos_mulheres / total) * 100 : 0;
+    case 'Numero_votos_nulos':               return stats.qt_votos_nulos;
+    case 'Numero_votos_brancos':             return stats.qt_votos_brancos;
+    default:                                  return null;
+  }
+}
+
+function atualizarCoresLocais() {
+  if (!dadosLocais.length) return;
+
+  const locaisVisiveis = document.getElementById('exibirLocais')?.checked;
+  if (!locaisVisiveis) return;
+
+  const campo = visualizacaoSelecionada;
+  const PRETO = '#242021';
+  const CINZA = '#888888';
+
+  // Socioeconômicos: pontos pretos, sem legenda de locais
+  if (['Numero_total_moradores', 'RendaPercapta'].includes(campo)) {
+    colorirLocais(new Map(dadosLocais.map((_, i) => [i, PRETO])));
+    return;
+  }
+
+  // Categórico partido
+  if (campo === 'PartidoMaisVotado') {
+    const mapa = new Map();
+    dadosLocais.forEach((ponto, i) => {
+      const row = ponto.rawRows.find(r => +r.FL_TRANSITO === 0) || ponto.rawRows[0];
+      if (!row) { mapa.set(i, CINZA); return; }
+      const s = _calcularStatsLocal(row);
+      mapa.set(i, s.empate_partido ? 'url(#hachura)' : corPartido(s.partido_mais_votado));
+    });
+    colorirLocais(mapa);
+    return;
+  }
+
+  // Categórico candidato
+  if (campo === 'VereadorMaisVotado') {
+    const mapa = new Map();
+    dadosLocais.forEach((ponto, i) => {
+      const row = ponto.rawRows.find(r => +r.FL_TRANSITO === 0) || ponto.rawRows[0];
+      if (!row) { mapa.set(i, CINZA); return; }
+      const s = _calcularStatsLocal(row);
+      if (s.empate_candidato) { mapa.set(i, 'url(#hachura)'); return; }
+      const key = `${s.nm_candidato_mais_votado}|${s.sg_partido_candidato_mais_votado}`;
+      mapa.set(i, _ultimaCorPorCand.get(key) || corPartido(s.sg_partido_candidato_mais_votado));
+    });
+    colorirLocais(mapa);
+    return;
+  }
+
+  // Degradê eleitoral: normaliza min–máx, colore pontos e atualiza legenda unificada
+  const vals = dadosLocais.map(ponto => {
+    const row = ponto.rawRows.find(r => +r.FL_TRANSITO === 0) || ponto.rawRows[0];
+    if (!row) return null;
+    return _getValorLocal(_calcularStatsLocal(row));
+  });
+
+  const validVals = vals.filter(v => v !== null && isFinite(v));
+  if (!validVals.length) return;
+
+  const minVal = Math.min(...validVals);
+  const maxVal = Math.max(...validVals);
+
+  const mapa = new Map();
+  vals.forEach((v, i) => {
+    if (v === null) { mapa.set(i, CINZA); return; }
+    const norm = maxVal === minVal ? 0.5 : (v - minVal) / (maxVal - minVal);
+    mapa.set(i, getColor(norm));
+  });
+  colorirLocais(mapa);
+
+  const iMin = vals.findIndex(v => v === minVal);
+  const iMax = vals.findIndex(v => v === maxVal);
+  renderizarLegendaDegrade({
+    modo: 'locais',
+    campo,
+    minVal,
+    maxVal,
+    nomeMin: tituloCase(dadosLocais[iMin]?.nomes[0] || ''),
+    nomeMax: tituloCase(dadosLocais[iMax]?.nomes[0] || ''),
+    tabela: null,
+    hasSemDado: false,
+  });
+}
+
+// Legenda degradê unificada — escreve sempre em #legendaMapa.
+// modo:'bairros' → escala cinza→azul, marcador de seleção, linha "sem dado".
+// modo:'locais'  → escala preto→amarelo, título "Locais de votação", sem marcador.
+function renderizarLegendaDegrade({ modo, campo, minVal, maxVal, nomeMin, nomeMax, tabela, hasSemDado }) {
   const el = document.getElementById('legendaMapa');
   if (!el) return;
 
-  const campoInfo = info[campo];
-  if (!campoInfo) { el.innerHTML = ''; return; }
+  const paradas = [0, 0.25, 0.5, 0.75, 1].map(n => getColor(n)).join(', ');
 
-  const { min, max, idMin, idMax } = campoInfo;
-
-  // Gradiente com 5 paradas usando a mesma fórmula de getCorBairro
-  const paradas = [0, 0.25, 0.5, 0.75, 1].map(n => corParaNorm(n)).join(', ');
-
-  // Marcador do bairro selecionado (sempre no DOM, oculto quando sem seleção)
-  let marcadorStyle = 'display:none';
-  if (selecao.modo === 'bairros' && selecao.id !== null) {
-    const row = tabela.find(r => r.id === selecao.id);
-    if (row) marcadorStyle = `left:${row[campo] ?? 0}%`;
+  // Marcador de bairro selecionado: só no modo bairros
+  let marcadorHtml = '';
+  if (modo === 'bairros') {
+    let marcadorStyle = 'display:none';
+    if (tabela && selecao.modo === 'bairros' && selecao.id !== null) {
+      const row = tabela.find(r => r.id === selecao.id);
+      if (row) marcadorStyle = `top:${100 - (row[campo] ?? 0)}%`;
+    }
+    marcadorHtml = `<div class="legenda-marcador" style="${marcadorStyle}"></div>`;
   }
 
-  // Bairros sem dado (presentes no GeoJSON mas sem local de votação)
-  const camposEleitorais = [
-    'Numero_total_votos', 'Numero_votos_validos',
-    'Numero_votos_pessoas_negras', 'Porcentagem_votos_pessoas_negras',
-    'Numero_votos_mulheres', 'Porcentagem_votos_mulheres',
-    'Numero_votos_nulos', 'Numero_votos_brancos',
-  ];
-  const hasSemDado = dadosGeoJson.features.some(f => !dadosBairros.has(f.properties.id));
   const semDadoHtml = hasSemDado
     ? `<div class="legenda-item" style="margin-top:2px">
          <span class="legenda-cor" style="background:#aaaaaa"></span>
-         ${camposEleitorais.includes(campo) ? 'Sem local de votação' : 'Sem dado'}
+         ${camposDegrade.includes(campo) ? 'Sem local de votação' : 'Sem dado'}
        </div>`
     : '';
 
+  const tituloHtml = modo === 'locais'
+    ? `<div class="legenda-locais-titulo">Locais de votação</div>`
+    : `<div class="legenda-locais-titulo">Bairros</div>`;
+
   el.innerHTML = `
+    ${tituloHtml}
     <div class="legenda-degrade">
-      <div class="legenda-degrade-barra-wrap">
-        <div class="legenda-degrade-barra" style="background:linear-gradient(to right,${paradas})"></div>
-        <div class="legenda-marcador" style="${marcadorStyle}"></div>
-      </div>
-      <div class="legenda-degrade-labels">
-        <div class="legenda-degrade-label">
-          <span>${formatarValorLegenda(min, campo)}</span>
-          <span class="legenda-degrade-nome">${propGeoJson(idMin).nome_exib || ''}</span>
+      <div class="legenda-degrade-corpo">
+        <div class="legenda-degrade-barra-wrap">
+          <div class="legenda-degrade-barra" style="background:linear-gradient(to top,${paradas})"></div>
+          ${marcadorHtml}
         </div>
-        <div class="legenda-degrade-label legenda-degrade-label--right">
-          <span>${formatarValorLegenda(max, campo)}</span>
-          <span class="legenda-degrade-nome">${propGeoJson(idMax).nome_exib || ''}</span>
+        <div class="legenda-degrade-labels">
+          <div class="legenda-degrade-label">
+            <span>${formatarValorLegenda(maxVal, campo)}</span>
+            <span class="legenda-degrade-nome">${nomeMax}</span>
+          </div>
+          <div class="legenda-degrade-label">
+            <span>${formatarValorLegenda(minVal, campo)}</span>
+            <span class="legenda-degrade-nome">${nomeMin}</span>
+          </div>
         </div>
       </div>
       ${semDadoHtml}
@@ -713,7 +865,7 @@ function atualizarMarcadorLegenda() {
   const row = _ultimaTabelaInfo.tabela.find(r => r.id === selecao.id);
   if (!row) { marcador.style.display = 'none'; return; }
 
-  marcador.style.left = `${row[visualizacaoSelecionada] ?? 0}%`;
+  marcador.style.top = `${100 - (row[visualizacaoSelecionada] ?? 0)}%`;
   marcador.style.removeProperty('display');
 }
 
@@ -735,6 +887,7 @@ function recolorirTodosBairros() {
   } else if (visualizacaoSelecionada === 'VereadorMaisVotado') {
     _ultimaTabelaInfo = null;
     const { mapaCores, contadorCand, corPorCand } = construirMapaCoresCandidatos();
+    _ultimaCorPorCand = corPorCand;
     colorirTodosCategorico(mapaCores);
 
     const nEmpate = [...dadosBairros.values()].filter(b => b.empate_candidato).length;
@@ -751,9 +904,30 @@ function recolorirTodosBairros() {
   } else {
     const { tabela, info } = criarTabelaNormalizada();
     _ultimaTabelaInfo = { tabela, info };
-    colorirTodos(tabela, visualizacaoSelecionada);
-    renderizarLegendaDegrade(visualizacaoSelecionada, tabela, info);
+    const campo = visualizacaoSelecionada;
+    const locaisVisiveis = document.getElementById('exibirLocais')?.checked;
+
+    if (locaisVisiveis && camposDegrade.includes(campo)) {
+      // Modo locais + campo degradê: bairros neutros; legenda virá de atualizarCoresLocais()
+      colorirTodosCategorico(new Map(), COR_BAIRRO_NEUTRO);
+      limparLegenda();
+    } else {
+      colorirTodos(tabela, campo);
+      const { min, max, idMin, idMax } = info[campo];
+      renderizarLegendaDegrade({
+        modo: 'bairros',
+        campo,
+        minVal: min,
+        maxVal: max,
+        nomeMin: propGeoJson(idMin).nome_exib || '',
+        nomeMax: propGeoJson(idMax).nome_exib || '',
+        tabela,
+        hasSemDado: dadosGeoJson.features.some(f => !dadosBairros.has(f.properties.id)),
+      });
+    }
   }
+
+  atualizarCoresLocais();
 }
 
 // --- Configuração dos cliques nos cards ---
@@ -771,6 +945,7 @@ function configurarClickCamposEleitorais() {
         atualizarDestaque();
         atualizarToggle();
         recolorirTodosBairros();
+        rolarParaMapa();
       });
     } else if (camposCategoricos.includes(campo)) {
       div.addEventListener('click', () => {
@@ -779,6 +954,7 @@ function configurarClickCamposEleitorais() {
         atualizarDestaque();
         atualizarToggle();
         recolorirTodosBairros();
+        rolarParaMapa();
       });
     }
   });
@@ -836,6 +1012,7 @@ function selecionarTodosLocais() {
   _limparLabelsBairro();
   atualizarPainelTodosBairros();
   atualizarMarcadorLegenda();
+  atualizarCoresLocais(); // restaura degradê no ponto que estava azul
 }
 
 function configurarToggleLocais() {
@@ -848,10 +1025,12 @@ function configurarToggleLocais() {
     if (ligado) {
       // Entra no modo locais: dropdown mostra locais, "todos" selecionado
       selecao = { modo: 'locais', id: null, nm: null };
+      atualizarTituloMapa(visualizacaoSelecionada);
       destacarLocalSelecionado(-1);
       selecionarBairro(null);
       gerarListaLocais();
       atualizarPainelTodosBairros();
+      recolorirTodosBairros(); // neutraliza bairros se campo é degradê; coloriza locais
     } else {
       // Sai do modo locais: seleciona o bairro do local (se havia) ou todos
       let idBairro = null;
@@ -862,7 +1041,9 @@ function configurarToggleLocais() {
       destacarLocalSelecionado(-1);
       _limparLabelsBairro();
       selecao = { modo: 'bairros', id: idBairro, nm: null };
+      atualizarTituloMapa(visualizacaoSelecionada);
       gerarListaBairros();
+      recolorirTodosBairros(); // restaura cor/legenda dos bairros
       if (idBairro !== null) atualizarBairroSelecionado(idBairro);
       else selecionarTodosBairros();
     }
@@ -885,6 +1066,7 @@ function configurarToggle() {
         : 'Numero_votos_mulheres';
     }
     atualizarDestaque();
+    atualizarTituloMapa(visualizacaoSelecionada);
     if (selecao.modo === 'locais') {
       if (selecao.id === null) atualizarPainelTodosBairros();
       else atualizarPainelLocal(selecao.id);
@@ -936,6 +1118,20 @@ function onHover(props, event, isMove) {
   }
 }
 
+// Rola suavemente para a seção do mapa; centraliza se couber na janela, senão alinha pelo topo
+function rolarParaMapa() {
+  const el = document.querySelector('.principal');
+  if (!el) return;
+  const block = el.getBoundingClientRect().height > window.innerHeight ? 'start' : 'center';
+  el.scrollIntoView({ behavior: 'smooth', block });
+}
+
+function onBackgroundClick() {
+  if (selecao.modo === 'locais') selecionarTodosLocais();
+  else selecionarTodosBairros();
+  rolarParaMapa();
+}
+
 function onClick(idBairro, event) {
   if (selecao.modo === 'locais') {
     if (!event) return;
@@ -945,10 +1141,12 @@ function onClick(idBairro, event) {
     const escolhido = rawRows.find(r => +r.FL_TRANSITO === 0) || rawRows[0];
     if (!escolhido) return;
     selecionarLocal(`${escolhido.NR_ZONA}-${escolhido.NR_LOCAL_VOTACAO}`);
+    rolarParaMapa();
     return;
   }
 
   atualizarBairroSelecionado(idBairro);
+  rolarParaMapa();
   // Celular (hover: none): mostra tooltip do local por 2 s junto ao toque
   if (!event || !window.matchMedia('(hover: none)').matches) return;
   const locaisAtivos = document.getElementById('exibirLocais')?.checked;
@@ -989,7 +1187,7 @@ async function init() {
   inicializarMapa(
     document.getElementById('Svg_Container'),
     dadosGeoJson,
-    { onHover, onClick }
+    { onHover, onClick, onBackgroundClick }
   );
   desenharLocais(dadosLocais);
 
@@ -1009,6 +1207,7 @@ async function init() {
       if (val === '') selecionarTodosBairros();
       else atualizarBairroSelecionado(+val);
     }
+    rolarParaMapa();
   });
 
   setTimeout(() => {

@@ -8,6 +8,7 @@ let _pontosSVG  = null;
 let _delaunay   = null;
 let _hoveredIdx      = -1;
 let _selectedLocalIdx = -1;
+let _coresLocais      = null; // último mapa de cores passado a colorirLocais
 
 function inicializarMapa(containerEl, geoJson, callbacks) {
   d3.select(containerEl).selectAll('*').remove();
@@ -49,7 +50,15 @@ function inicializarMapa(containerEl, geoJson, callbacks) {
   const projection = d3.geoMercator().fitSize([w, h], geoJson);
   const pathGen = d3.geoPath().projection(projection);
 
-  svg.append('g')
+  // Fundo clicável para desselecionar — deve vir antes dos paths (z-order SVG)
+  svg.append('rect')
+    .attr('width', w)
+    .attr('height', h)
+    .attr('fill', 'none')
+    .attr('pointer-events', 'all')
+    .on('click', () => callbacks.onBackgroundClick?.());
+
+  svg.append('g').attr('id', 'g-bairros')
     .selectAll('path')
     .data(geoJson.features)
     .join('path')
@@ -74,19 +83,22 @@ function colorirBairro(idBairro, cor) {
   if (el) el.style.fill = cor;
 }
 
-function colorirTodos(tabelaNormalizada, campo) {
-  tabelaNormalizada.forEach(row => {
-    const cor = getCorBairro(row.id, campo, tabelaNormalizada);
-    colorirBairro(row.id, cor);
+function colorirTodos(tabelaNormalizada, campo, corSemDado = '#aaaaaa') {
+  const tabMap = new Map(tabelaNormalizada.map(r => [r.id, r]));
+  document.querySelectorAll('#Svg_Container [data-id]').forEach(el => {
+    const id = +el.getAttribute('data-id');
+    el.style.fill = tabMap.has(id)
+      ? getCorBairro(id, campo, tabelaNormalizada)
+      : corSemDado;
   });
 }
 
 // Colore todos os paths do SVG a partir de um Map<idBairro, cor>.
-// Paths sem entrada no map recebem a cor padrão "sem dado".
-function colorirTodosCategorico(mapaCores) {
+// Paths sem entrada no map recebem corDefault (bairros sem dado ou modo neutro).
+function colorirTodosCategorico(mapaCores, corDefault = '#aaaaaa') {
   document.querySelectorAll('#Svg_Container [data-id]').forEach(el => {
     const id = +el.getAttribute('data-id');
-    el.style.fill = mapaCores.get(id) || '#aaaaaa';
+    el.style.fill = mapaCores.get(id) || corDefault;
   });
 }
 
@@ -118,11 +130,11 @@ function _atualizarRaio() {
   _gLocais.selectAll('circle').each(function(d, i) {
     const c = d3.select(this);
     if (i === _hoveredIdx) {
-      c.attr('r', r * 5 / 3).attr('stroke-width', r / 3);
+      c.attr('r', r * 5 / 3).attr('stroke-width', 2);
     } else if (i === _selectedLocalIdx) {
-      c.attr('r', r * 4 / 3).attr('stroke-width', r / 2);
+      c.attr('r', r * 4 / 3).attr('stroke-width', 2);
     } else {
-      c.attr('r', r).attr('stroke-width', null);
+      c.attr('r', r).attr('stroke-width', 0.75);
     }
   });
 }
@@ -133,6 +145,7 @@ function desenharLocais(pontos) {
   _hoveredIdx       = -1;
   _selectedLocalIdx = -1;
   _pontos     = pontos && pontos.length ? pontos : null;
+  _coresLocais = null;
   if (!_pontos) { _pontosSVG = null; _delaunay = null; return; }
 
   _pontosSVG = _pontos.map(d => {
@@ -149,7 +162,9 @@ function desenharLocais(pontos) {
     .attr('cy', (d, i) => _pontosSVG[i][1])
     .attr('r', r)
     .attr('fill', '#000')
-    .attr('fill-opacity', 0.8)
+    .attr('stroke', 'rgba(255,255,255,0.8)')
+    .attr('stroke-width', 0.75)
+    .attr('vector-effect', 'non-scaling-stroke')
     .attr('pointer-events', 'none');
 }
 
@@ -178,17 +193,17 @@ function setLocalHover(idx) {
     const r = _calcRaio();
     const prev = circles.filter((d, i) => i === _hoveredIdx);
     if (_hoveredIdx === _selectedLocalIdx) {
-      prev.attr('r', r * 4 / 3).attr('stroke', '#fff').attr('stroke-width', r / 2).attr('fill', '#2563eb');
+      prev.attr('r', r * 4 / 3).attr('stroke', '#fff').attr('stroke-width', 2).attr('fill', '#2563eb');
     } else {
-      prev.attr('r', r).attr('stroke', null).attr('stroke-width', null);
+      prev.attr('r', r).attr('stroke', 'rgba(255,255,255,0.8)').attr('stroke-width', 0.75);
     }
   }
   _hoveredIdx = idx;
   if (idx >= 0) {
     circles.filter((d, i) => i === idx)
-      .attr('r', _calcRaio() * 5 / 3)        // ~5 px em tela
+      .attr('r', _calcRaio() * 5 / 3)
       .attr('stroke', '#fff')
-      .attr('stroke-width', _calcRaio() / 3); // ~1 px
+      .attr('stroke-width', 2);
   }
 }
 
@@ -196,13 +211,13 @@ function destacarLocalSelecionado(idx) {
   if (!_gLocais) return;
   const circles = _gLocais.selectAll('circle');
   const r = _calcRaio();
-  // Reset previously selected
   if (_selectedLocalIdx >= 0 && _selectedLocalIdx !== idx) {
+    const corOriginal = _coresLocais?.get(_selectedLocalIdx) ?? '#000000';
     circles.filter((d, i) => i === _selectedLocalIdx)
       .attr('r', r)
-      .attr('fill', '#000')
-      .attr('stroke', null)
-      .attr('stroke-width', null);
+      .attr('fill', corOriginal)
+      .attr('stroke', 'rgba(255,255,255,0.8)')
+      .attr('stroke-width', 0.75);
   }
   _selectedLocalIdx = idx;
   if (idx >= 0) {
@@ -210,6 +225,16 @@ function destacarLocalSelecionado(idx) {
       .attr('r', r * 4 / 3)
       .attr('fill', '#2563eb')
       .attr('stroke', '#fff')
-      .attr('stroke-width', r / 2);
+      .attr('stroke-width', 2);
   }
 }
+
+function colorirLocais(mapaCores) {
+  _coresLocais = mapaCores;
+  if (!_gLocais) return;
+  _gLocais.selectAll('circle').each(function(d, i) {
+    if (i === _selectedLocalIdx) return; // preserva seleção azul
+    d3.select(this).attr('fill', mapaCores.get(i) ?? '#000000');
+  });
+}
+
