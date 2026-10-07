@@ -373,7 +373,7 @@ a {
 .containerToggleGrupo {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--espacamento) / 4);
+  gap: 0.2rem;
   flex: none;
 }
 
@@ -381,8 +381,17 @@ a {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: var(--espacamento);
+  gap: 0.5rem;
+  min-height: 2rem;
   flex: none;
+}
+
+.containerOpcaoToggle h3 {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #555;
+  margin: 0;
+  flex: 1;
 }
 
 .informacoes {

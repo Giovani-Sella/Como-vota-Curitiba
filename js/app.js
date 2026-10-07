@@ -43,18 +43,18 @@ const camposDegrade = camposVisualizaveis.filter(c =>
 const COR_BAIRRO_NEUTRO = '#d0d0d0';
 
 const titulosPorVisualizacao = {
-  Numero_total_votos:               t => `Total de votos — ${t}`,
-  Numero_votos_validos:             t => `Votos válidos — ${t}`,
-  Numero_votos_pessoas_negras:      t => `Votos em pessoas negras — ${t}`,
-  Porcentagem_votos_pessoas_negras: t => `% de votos em pessoas negras — ${t}`,
-  Numero_votos_mulheres:            t => `Votos em mulheres — ${t}`,
-  Porcentagem_votos_mulheres:       t => `% de votos em mulheres — ${t}`,
-  Numero_votos_nulos:               t => `Votos nulos — ${t}`,
-  Numero_votos_brancos:             t => `Votos brancos — ${t}`,
-  Numero_total_moradores:           () => 'Moradores por bairro de Curitiba (Censo 2022)',
-  RendaPercapta:                    () => 'Renda per capita por bairro de Curitiba (Censo 2010)',
-  PartidoMaisVotado:                () => 'Partido mais votado por bairro',
-  VereadorMaisVotado:               () => 'Candidato mais votado por bairro',
+  Numero_total_votos:               (t, u) => `Votos totais ${u} — ${t}`,
+  Numero_votos_validos:             (t, u) => `Votos válidos ${u} — ${t}`,
+  Numero_votos_pessoas_negras:      (t, u) => `Votos em candidatos negros ${u} — ${t}`,
+  Porcentagem_votos_pessoas_negras: (t, u) => `% dos votos em candidatos negros ${u} — ${t}`,
+  Numero_votos_mulheres:            (t, u) => `Votos em candidatas mulheres ${u} — ${t}`,
+  Porcentagem_votos_mulheres:       (t, u) => `% dos votos em candidatas mulheres ${u} — ${t}`,
+  Numero_votos_nulos:               (t, u) => `Votos nulos ${u} — ${t}`,
+  Numero_votos_brancos:             (t, u) => `Votos em branco ${u} — ${t}`,
+  Numero_total_moradores:           (t, u) => `População residente ${u} — Curitiba (Censo 2022)`,
+  RendaPercapta:                    (t, u) => `Renda média por habitante ${u} — Curitiba (R$ de 2010, Censo 2010)`,
+  PartidoMaisVotado:                (t, u) => `Partido mais votado ${u} — ${t}`,
+  VereadorMaisVotado:               (t, u) => `Candidato mais votado ${u} — ${t}`,
 };
 
 // Retorna properties do GeoJSON para um id IPPUC
@@ -160,8 +160,13 @@ function atualizarTituloMapa(campo) {
   const el = document.querySelector('#tituloMapa h2');
   if (!el) return;
   const titulo = tituloEleicao(dadosEleicaoAtual);
+  // Socioeconômicos colorem bairros mesmo com locais ligados — unidade é sempre bairro
+  const camposSocio = ['Numero_total_moradores', 'RendaPercapta'];
+  const unidade = (!camposSocio.includes(campo) && selecao.modo === 'locais')
+    ? 'por local de votação'
+    : 'por bairro';
   const fn = titulosPorVisualizacao[campo];
-  el.textContent = fn ? fn(titulo) : 'Mapa de Curitiba';
+  el.textContent = fn ? fn(titulo, unidade) : 'Mapa de Curitiba';
 }
 
 function atualizarDestaque() {
@@ -200,7 +205,9 @@ function atualizarPainelInformacoes(idBairro) {
   document.getElementById('Numero_votos_mulheres').classList.toggle('hidden', mostrarPorcentagem);
 
   if (!b) {
-    const semVoto = 'Sem local de votação';
+    const semVoto = dadosEleicaoAtual?.ano
+      ? `Sem local de votação em ${dadosEleicaoAtual.ano}`
+      : 'Sem local de votação';
     ['Numero_total_votos', 'Numero_votos_validos',
      'Numero_votos_pessoas_negras', 'Porcentagem_votos_pessoas_negras',
      'Numero_votos_mulheres', 'Porcentagem_votos_mulheres',
@@ -1018,6 +1025,7 @@ function configurarToggleLocais() {
     if (ligado) {
       // Entra no modo locais: dropdown mostra locais, "todos" selecionado
       selecao = { modo: 'locais', id: null, nm: null };
+      atualizarTituloMapa(visualizacaoSelecionada);
       destacarLocalSelecionado(-1);
       selecionarBairro(null);
       gerarListaLocais();
@@ -1033,6 +1041,7 @@ function configurarToggleLocais() {
       destacarLocalSelecionado(-1);
       _limparLabelsBairro();
       selecao = { modo: 'bairros', id: idBairro, nm: null };
+      atualizarTituloMapa(visualizacaoSelecionada);
       gerarListaBairros();
       recolorirTodosBairros(); // restaura cor/legenda dos bairros
       if (idBairro !== null) atualizarBairroSelecionado(idBairro);
@@ -1057,6 +1066,7 @@ function configurarToggle() {
         : 'Numero_votos_mulheres';
     }
     atualizarDestaque();
+    atualizarTituloMapa(visualizacaoSelecionada);
     if (selecao.modo === 'locais') {
       if (selecao.id === null) atualizarPainelTodosBairros();
       else atualizarPainelLocal(selecao.id);

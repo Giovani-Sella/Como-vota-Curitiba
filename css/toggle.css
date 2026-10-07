@@ -5,8 +5,9 @@
 .toggle-switch {
     position: relative;
     display: inline-block;
-    width: 40px;      /* 80 → 40 */
-    height: 20px;     /* 40 → 20 */
+    width: 2rem;
+    height: 1rem;
+    flex-shrink: 0;
     cursor: pointer;
 }
 
@@ -22,18 +23,18 @@
     width: 100%;
     height: 100%;
     background-color: #ddd;
-    border-radius: 10px; /* 20 → 10 */
-    box-shadow: inset 0 0 0 1px #ccc; /* 2px → 1px */
+    border-radius: 0.5rem;
+    box-shadow: inset 0 0 0 1px #ccc;
     transition: background-color 0.3s ease-in-out;
 }
 
 /* Handle */
 .toggle-switch-handle {
     position: absolute;
-    top: 2.5px;   /* 5 → 2.5 */
-    left: 2.5px;
-    width: 15px;  /* 30 → 15 */
-    height: 15px;
+    top: 0.125rem;
+    left: 0.125rem;
+    width: 0.75rem;
+    height: 0.75rem;
     background-color: #fff;
     border-radius: 50%;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -55,8 +56,8 @@
 
 /* Checked */
 .toggle-switch input[type="checkbox"]:checked + .toggle-switch-background .toggle-switch-handle {
-    transform: translateX(20px); /* 40–45 → 20 */
-    box-shadow: 
+    transform: translateX(1rem);
+    box-shadow:
         0 1px 3px rgba(0, 0, 0, 0.2),
         0 0 0 1.5px var(--cor-texto);
 }

@@ -83,10 +83,13 @@ function colorirBairro(idBairro, cor) {
   if (el) el.style.fill = cor;
 }
 
-function colorirTodos(tabelaNormalizada, campo) {
-  tabelaNormalizada.forEach(row => {
-    const cor = getCorBairro(row.id, campo, tabelaNormalizada);
-    colorirBairro(row.id, cor);
+function colorirTodos(tabelaNormalizada, campo, corSemDado = '#aaaaaa') {
+  const tabMap = new Map(tabelaNormalizada.map(r => [r.id, r]));
+  document.querySelectorAll('#Svg_Container [data-id]').forEach(el => {
+    const id = +el.getAttribute('data-id');
+    el.style.fill = tabMap.has(id)
+      ? getCorBairro(id, campo, tabelaNormalizada)
+      : corSemDado;
   });
 }
 
