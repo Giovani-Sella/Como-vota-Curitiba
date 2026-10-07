@@ -118,11 +118,11 @@ function _atualizarRaio() {
   _gLocais.selectAll('circle').each(function(d, i) {
     const c = d3.select(this);
     if (i === _hoveredIdx) {
-      c.attr('r', r * 5 / 3).attr('stroke-width', r / 3);
+      c.attr('r', r * 5 / 3).attr('stroke-width', 2);
     } else if (i === _selectedLocalIdx) {
-      c.attr('r', r * 4 / 3).attr('stroke-width', r / 2);
+      c.attr('r', r * 4 / 3).attr('stroke-width', 2);
     } else {
-      c.attr('r', r).attr('stroke-width', null);
+      c.attr('r', r).attr('stroke-width', 0.75);
     }
   });
 }
@@ -149,7 +149,9 @@ function desenharLocais(pontos) {
     .attr('cy', (d, i) => _pontosSVG[i][1])
     .attr('r', r)
     .attr('fill', '#000')
-    .attr('fill-opacity', 0.8)
+    .attr('stroke', 'rgba(255,255,255,0.8)')
+    .attr('stroke-width', 0.75)
+    .attr('vector-effect', 'non-scaling-stroke')
     .attr('pointer-events', 'none');
 }
 
@@ -178,17 +180,17 @@ function setLocalHover(idx) {
     const r = _calcRaio();
     const prev = circles.filter((d, i) => i === _hoveredIdx);
     if (_hoveredIdx === _selectedLocalIdx) {
-      prev.attr('r', r * 4 / 3).attr('stroke', '#fff').attr('stroke-width', r / 2).attr('fill', '#2563eb');
+      prev.attr('r', r * 4 / 3).attr('stroke', '#fff').attr('stroke-width', 2).attr('fill', '#2563eb');
     } else {
-      prev.attr('r', r).attr('stroke', null).attr('stroke-width', null);
+      prev.attr('r', r).attr('stroke', 'rgba(255,255,255,0.8)').attr('stroke-width', 0.75);
     }
   }
   _hoveredIdx = idx;
   if (idx >= 0) {
     circles.filter((d, i) => i === idx)
-      .attr('r', _calcRaio() * 5 / 3)        // ~5 px em tela
+      .attr('r', _calcRaio() * 5 / 3)
       .attr('stroke', '#fff')
-      .attr('stroke-width', _calcRaio() / 3); // ~1 px
+      .attr('stroke-width', 2);
   }
 }
 
@@ -196,13 +198,12 @@ function destacarLocalSelecionado(idx) {
   if (!_gLocais) return;
   const circles = _gLocais.selectAll('circle');
   const r = _calcRaio();
-  // Reset previously selected
   if (_selectedLocalIdx >= 0 && _selectedLocalIdx !== idx) {
     circles.filter((d, i) => i === _selectedLocalIdx)
       .attr('r', r)
       .attr('fill', '#000')
-      .attr('stroke', null)
-      .attr('stroke-width', null);
+      .attr('stroke', 'rgba(255,255,255,0.8)')
+      .attr('stroke-width', 0.75);
   }
   _selectedLocalIdx = idx;
   if (idx >= 0) {
@@ -210,6 +211,14 @@ function destacarLocalSelecionado(idx) {
       .attr('r', r * 4 / 3)
       .attr('fill', '#2563eb')
       .attr('stroke', '#fff')
-      .attr('stroke-width', r / 2);
+      .attr('stroke-width', 2);
   }
+}
+
+function colorirLocais(mapaCores) {
+  if (!_gLocais) return;
+  _gLocais.selectAll('circle').each(function(d, i) {
+    if (i === _selectedLocalIdx) return; // preserva seleção azul
+    d3.select(this).attr('fill', mapaCores.get(i) ?? '#000000');
+  });
 }

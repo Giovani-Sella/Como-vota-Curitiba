@@ -8,6 +8,7 @@ function injetarMapaPainel(elementId) {
         <div class="tituloMapa" id="tituloMapa">
           <h2>Mapa de Curitiba (titulo vai ser alterado conforme visualização)</h2>
           <div id="legendaMapa"></div>
+          <div id="legendaLocais"></div>
         </div>
         <div class="followArea" id="followArea">
           <div id="Svg_Container"></div>

@@ -12,6 +12,9 @@ let carregandoEleicao = false;
 // Paleta de fallback para partidos sem cor definida (persiste na sessão)
 const _paletaFallback = new Map();
 
+// Cache da última corPorCand calculada — compartilhada com atualizarCoresLocais
+let _ultimaCorPorCand = new Map();
+
 // Cache da última tabela normalizada — atualiza o marcador da legenda sem recolorir o mapa
 let _ultimaTabelaInfo = null;
 
@@ -466,6 +469,7 @@ async function trocarEleicao() {
   atualizarTituloMapa(visualizacaoSelecionada);
   desenharLocais(dadosLocais);
   mostrarLocais(document.getElementById('exibirLocais')?.checked ?? false);
+  atualizarCoresLocais(); // re-aplica após desenharLocais resetar os fills
 
   if (selecao.modo === 'locais') {
     if (selecao.id !== null) {
@@ -647,6 +651,156 @@ function limparLegenda() {
   if (el) el.innerHTML = '';
 }
 
+// --- Legenda e cores dos locais de votação ---
+
+function limparLegendaLocais() {
+  const el = document.getElementById('legendaLocais');
+  if (el) el.innerHTML = '';
+}
+
+function renderizarLegendaLocais(vals, campo, minVal, maxVal) {
+  const el = document.getElementById('legendaLocais');
+  if (!el) return;
+  const iMin = vals.findIndex(v => v === minVal);
+  const iMax = vals.findIndex(v => v === maxVal);
+  const nomeMin = tituloCase(dadosLocais[iMin]?.nomes[0] || '');
+  const nomeMax = tituloCase(dadosLocais[iMax]?.nomes[0] || '');
+  el.innerHTML = `
+    <div class="legenda-locais-titulo">Locais de votação</div>
+    <div class="legenda-degrade">
+      <div class="legenda-degrade-barra-wrap">
+        <div class="legenda-degrade-barra" style="background:linear-gradient(to right,#242021,#fccb00)"></div>
+      </div>
+      <div class="legenda-degrade-labels">
+        <div class="legenda-degrade-label">
+          <span>${formatarValorLegenda(minVal, campo)}</span>
+          <span class="legenda-degrade-nome">${nomeMin}</span>
+        </div>
+        <div class="legenda-degrade-label legenda-degrade-label--right">
+          <span>${formatarValorLegenda(maxVal, campo)}</span>
+          <span class="legenda-degrade-nome">${nomeMax}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+// Calcula stats de um local a partir de uma linha crua do CSV.
+function _calcularStatsLocal(row) {
+  const qtTotal   = +row.QT_VOTOS_TOTAL   || 0;
+  const qtBrancos = +row.QT_VOTOS_BRANCOS || 0;
+  const qtNulos   = +row.QT_VOTOS_NULOS   || 0;
+
+  const _cand = {};
+  for (const nr of dadosCandNums) _cand[nr] = +row[`CAND_${nr}`] || 0;
+
+  const _leg = {};
+  for (const nrPartido of dadosLegMap.keys()) _leg[nrPartido] = +row[`LEG_${nrPartido}`] || 0;
+
+  const votos_validos = dadosCandNums.reduce((s, nr) => s + _cand[nr], 0)
+    + Object.values(_leg).reduce((s, v) => s + v, 0);
+
+  let votos_negros = 0, votos_mulheres = 0;
+  for (const nr of dadosCandNums) {
+    const c = dadosCandMap.get(nr);
+    if (!c) continue;
+    const v = _cand[nr];
+    if (c.NEGRO === '1')            votos_negros   += v;
+    if (c.DS_GENERO === 'FEMININO') votos_mulheres += v;
+  }
+
+  const b = { _cand, _leg, qt_votos_total: qtTotal, votos_validos };
+  _calcVencedores(b);
+
+  return { qt_votos_total: qtTotal, qt_votos_brancos: qtBrancos, qt_votos_nulos: qtNulos,
+           votos_validos, votos_negros, votos_mulheres, ...b };
+}
+
+// Retorna o valor numérico bruto do campo ativo para um objeto stats.
+function _getValorLocal(stats) {
+  const total = stats.qt_votos_total || 0;
+  switch (visualizacaoSelecionada) {
+    case 'Numero_total_votos':               return total;
+    case 'Numero_votos_validos':             return stats.votos_validos;
+    case 'Numero_votos_pessoas_negras':      return stats.votos_negros;
+    case 'Porcentagem_votos_pessoas_negras': return total > 0 ? (stats.votos_negros   / total) * 100 : 0;
+    case 'Numero_votos_mulheres':            return stats.votos_mulheres;
+    case 'Porcentagem_votos_mulheres':       return total > 0 ? (stats.votos_mulheres / total) * 100 : 0;
+    case 'Numero_votos_nulos':               return stats.qt_votos_nulos;
+    case 'Numero_votos_brancos':             return stats.qt_votos_brancos;
+    default:                                  return null;
+  }
+}
+
+function atualizarCoresLocais() {
+  if (!dadosLocais.length) return;
+
+  const locaisVisiveis = document.getElementById('exibirLocais')?.checked;
+  if (!locaisVisiveis) { limparLegendaLocais(); return; }
+
+  const campo = visualizacaoSelecionada;
+  const PRETO  = '#242021';
+  const CINZA  = '#888888';
+
+  // Cards socioeconômicos: pontos pretos, sem legenda de locais
+  if (['Numero_total_moradores', 'RendaPercapta'].includes(campo)) {
+    colorirLocais(new Map(dadosLocais.map((_, i) => [i, PRETO])));
+    limparLegendaLocais();
+    return;
+  }
+
+  // Cards categóricos: cor do partido/candidato vencedor no local
+  if (campo === 'PartidoMaisVotado') {
+    const mapa = new Map();
+    dadosLocais.forEach((ponto, i) => {
+      const row = ponto.rawRows.find(r => +r.FL_TRANSITO === 0) || ponto.rawRows[0];
+      if (!row) { mapa.set(i, CINZA); return; }
+      const s = _calcularStatsLocal(row);
+      mapa.set(i, s.empate_partido ? 'url(#hachura)' : corPartido(s.partido_mais_votado));
+    });
+    colorirLocais(mapa);
+    limparLegendaLocais();
+    return;
+  }
+
+  if (campo === 'VereadorMaisVotado') {
+    const mapa = new Map();
+    dadosLocais.forEach((ponto, i) => {
+      const row = ponto.rawRows.find(r => +r.FL_TRANSITO === 0) || ponto.rawRows[0];
+      if (!row) { mapa.set(i, CINZA); return; }
+      const s = _calcularStatsLocal(row);
+      if (s.empate_candidato) { mapa.set(i, 'url(#hachura)'); return; }
+      const key = `${s.nm_candidato_mais_votado}|${s.sg_partido_candidato_mais_votado}`;
+      mapa.set(i, _ultimaCorPorCand.get(key) || corPartido(s.sg_partido_candidato_mais_votado));
+    });
+    colorirLocais(mapa);
+    limparLegendaLocais();
+    return;
+  }
+
+  // Cards de degradê: normaliza min–máx entre os locais da eleição atual
+  const vals = dadosLocais.map(ponto => {
+    const row = ponto.rawRows.find(r => +r.FL_TRANSITO === 0) || ponto.rawRows[0];
+    if (!row) return null;
+    return _getValorLocal(_calcularStatsLocal(row));
+  });
+
+  const validVals = vals.filter(v => v !== null && isFinite(v));
+  if (!validVals.length) { limparLegendaLocais(); return; }
+
+  const minVal = Math.min(...validVals);
+  const maxVal = Math.max(...validVals);
+  const interpolate = d3.interpolateRgb(PRETO, '#fccb00');
+
+  const mapa = new Map();
+  vals.forEach((v, i) => {
+    if (v === null) { mapa.set(i, CINZA); return; }
+    const norm = maxVal === minVal ? 0.5 : (v - minVal) / (maxVal - minVal);
+    mapa.set(i, interpolate(norm));
+  });
+  colorirLocais(mapa);
+  renderizarLegendaLocais(vals, campo, minVal, maxVal);
+}
+
 function renderizarLegendaDegrade(campo, tabela, info) {
   const el = document.getElementById('legendaMapa');
   if (!el) return;
@@ -735,6 +889,7 @@ function recolorirTodosBairros() {
   } else if (visualizacaoSelecionada === 'VereadorMaisVotado') {
     _ultimaTabelaInfo = null;
     const { mapaCores, contadorCand, corPorCand } = construirMapaCoresCandidatos();
+    _ultimaCorPorCand = corPorCand;
     colorirTodosCategorico(mapaCores);
 
     const nEmpate = [...dadosBairros.values()].filter(b => b.empate_candidato).length;
@@ -754,6 +909,8 @@ function recolorirTodosBairros() {
     colorirTodos(tabela, visualizacaoSelecionada);
     renderizarLegendaDegrade(visualizacaoSelecionada, tabela, info);
   }
+
+  atualizarCoresLocais();
 }
 
 // --- Configuração dos cliques nos cards ---
@@ -836,6 +993,7 @@ function selecionarTodosLocais() {
   _limparLabelsBairro();
   atualizarPainelTodosBairros();
   atualizarMarcadorLegenda();
+  atualizarCoresLocais(); // restaura degradê no ponto que estava azul
 }
 
 function configurarToggleLocais() {
@@ -852,6 +1010,7 @@ function configurarToggleLocais() {
       selecionarBairro(null);
       gerarListaLocais();
       atualizarPainelTodosBairros();
+      atualizarCoresLocais();
     } else {
       // Sai do modo locais: seleciona o bairro do local (se havia) ou todos
       let idBairro = null;
@@ -861,6 +1020,7 @@ function configurarToggleLocais() {
       }
       destacarLocalSelecionado(-1);
       _limparLabelsBairro();
+      limparLegendaLocais();
       selecao = { modo: 'bairros', id: idBairro, nm: null };
       gerarListaBairros();
       if (idBairro !== null) atualizarBairroSelecionado(idBairro);
