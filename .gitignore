@@ -1,3 +1,7 @@
 dados/perfil_eleitor_secao_ATUAL_PR.zip
 dados/perfil_eleitor_secao_ATUAL_PR/
 dados/Tratamento de dados/
+
+# Arquivos brutos do TSE (não fazem parte do site)
+dados/**/*.zip
+dados/*/Relatorio_Resultado_Totalizacao_*/
