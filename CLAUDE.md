@@ -16,6 +16,11 @@ Eleições com dados: 2022 (pres 1t/2t, gov, sen, depfed, depes), 2024 (pref 1t/
 - `dev`: desenvolvimento. `main`: produção. O GitHub Actions (.github/workflows/static.yml)
   publica o repositório inteiro no GitHub Pages a cada push na `main` (domínio em CNAME).
 - Tudo o que está commitado na `main` vai para o ar: nada de arquivos brutos (zip, PDF do TSE) no git.
+- Sincronização: um hook SessionStart (.claude/hooks/sincronizar-git.sh) faz fetch e fast-forward
+  das branches locais no início de cada sessão. Depois de um merge ou push feito no GitHub
+  durante a sessão, rodar o mesmo script para manter o repositório local atualizado.
+- Git neste terminal não tem credencial própria: usar
+  `git -c credential.helper='!gh auth git-credential' push ...` (login do gh).
 
 ## Adicionar uma eleição
 1. Gerar em R o CSV `dados/<ano>/<ano>_resultado_<cargo>_cwb[_<n>t]_por_local.csv` e atualizar

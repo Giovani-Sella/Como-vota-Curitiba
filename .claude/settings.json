@@ -4,5 +4,19 @@
       "Read(./dados/Tratamento de dados/**)",
       "Read(./node_modules/**)"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/sincronizar-git.sh",
+            "timeout": 30,
+            "statusMessage": "Sincronizando com o GitHub..."
+          }
+        ]
+      }
+    ]
   }
 }
